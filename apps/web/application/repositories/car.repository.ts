@@ -4,7 +4,7 @@ import type { CarEntity } from '../../domain/entities/car';
 export interface ICarRepository {
     getAll(): Promise<CarEntity[]>;
     get(id: string): Promise<CarEntity>;
-    query(query: string): Promise<any>;
+    query(query: string): Promise<CarEntity[]>;
 }
 
 // class MongooseCarRepository implements ICarRepository {

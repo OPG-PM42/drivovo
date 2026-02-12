@@ -6,7 +6,7 @@
     "dev": "nx dev web",
     "build": "nx build web",
     "start": "nx start web",
-    "lint": "nx lint web",
+    "lint": "eslint apps/web",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -16,7 +16,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.0.0",
+    "@eslint/js": "^9.39.2",
     "@nx/next": "22.5.0",
     "@nx/workspace": "22.5.0",
     "@types/node": "^22.0.0",
@@ -26,10 +26,12 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.15.0",
     "nx": "22.5.0",
     "postcss": "^8.4.49",
     "prettier": "^3.4.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.55.0"
   }
 }

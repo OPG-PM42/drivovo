@@ -5,7 +5,7 @@ import type { CreditEntity } from "../entities/credit";
 export class CreditService {
     constructor(private readonly carRepository: ICarRepository) {}
 
-    async createCredit(credit: CreditEntity): Promise<CreditEntity> {
+    public async createCredit(credit: CreditEntity): Promise<CreditEntity> {
         const filteredCars = await this.carRepository.query('SElECT * ...');
         const cars = await this.carRepository.getAll();
         const car = cars.find((car) => car.id === credit.car.id);
