@@ -1,4 +1,5 @@
-import mongooseCarRepository, { type ICarRepository } from "../../application/repositories/car.repository";
+// import mongooseCarRepository, { type ICarRepository } from "../../application/repositories/car.repository";
+import type { ICarRepository } from "../../application/repositories/car.repository";
 import type { CreditEntity } from "../entities/credit";
 
 export class CreditService {
@@ -18,4 +19,4 @@ export class CreditService {
     }
 }
 
-export default new CreditService(mongooseCarRepository);
+// export default new CreditService(mongooseCarRepository);
