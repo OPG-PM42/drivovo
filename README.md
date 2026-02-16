@@ -4,12 +4,38 @@ Nx-монорепозиторий на базе Next.js 16 и React 19 с арх
 
 ## Технологический стек
 
+### Frontend
 - **Монорепозиторий:** Nx 22.5
 - **Фреймворк:** Next.js 16 (App Router)
 - **UI:** React 19
 - **Язык:** TypeScript 5.6 (strict mode)
 - **Стили:** Tailwind CSS 3.4
 - **Линтинг:** ESLint 9 + Prettier
+
+### Backend
+- **Фреймворк:** Fastify 5
+- **База данных:** PostgreSQL 16
+- **ORM:** Нативный PostgreSQL клиент (@fastify/postgres)
+- **Язык:** TypeScript 5.6 (strict mode)
+
+## Структура проекта
+
+```
+drivovo/
+├── apps/
+│   ├── web/              # Next.js фронтенд приложение
+│   └── api/              # Fastify бэкенд API
+│       ├── src/
+│       │   ├── config/   # Конфигурация
+│       │   ├── plugins/  # Fastify плагины (БД, и др.)
+│       │   ├── routes/   # API маршруты
+│       │   └── main.ts   # Точка входа
+│       ├── database/     # SQL скрипты
+│       └── README.md     # Документация API
+├── .env.example          # Пример переменных окружения
+├── .env                  # Локальные переменные окружения
+└── docker-compose.yml    # Docker конфигурация для PostgreSQL
+```
 
 ## Локальная установка и настройка
 
@@ -21,36 +47,83 @@ Nx-монорепозиторий на базе Next.js 16 и React 19 с арх
 npm ci
 ```
 
-3. Запуск dev-сервера на <http://localhost:3000/> :
+3. Настройка переменных окружения:
 
 ```shell
+# Скопируйте .env.example в .env и настройте параметры
+cp .env.example .env
+```
+
+4. Запуск PostgreSQL (требуется Docker):
+
+```shell
+docker-compose up -d
+```
+
+База данных будет инициализирована автоматически с примерами данных.
+
+5. Запуск проектов:
+
+```shell
+# Только фронтенд (http://localhost:3000)
 npm run dev
+
+# Только API (http://localhost:3001)
+npm run dev:api
+
+# Фронтенд и API одновременно
+npm run dev:all
 ```
 
-4. Сборка проекта в production режиме:
+6. Сборка проектов в production режиме:
 
 ```shell
+# Только фронтенд
 npm run build
+
+# Только API
+npm run build:api
+
+# Все проекты
+npm run build:all
 ```
 
-5. Запуск production сервера:
+7. Запуск production серверов:
 
 ```shell
+# Фронтенд
 npm run start
+
+# API
+npm run start:api
 ```
 
-6. Линтинг:
+8. Линтинг:
 
 ```shell
 npm run lint
 ```
 
-7. Форматирование кода:
+9. Форматирование кода:
 
 ```shell
 npm run format
 npm run format:check
 ```
+
+## API Документация
+
+Подробная документация по API доступна в [apps/api/README.md](apps/api/README.md).
+
+### Основные эндпоинты
+
+- `GET /api/health` - Проверка состояния сервера
+- `GET /api/health/db` - Проверка подключения к БД
+- `GET /api/users` - Получить список пользователей
+- `POST /api/users` - Создать пользователя
+- `GET /api/users/:id` - Получить пользователя по ID
+- `PUT /api/users/:id` - Обновить пользователя
+- `DELETE /api/users/:id` - Удалить пользователя
 
 ## Соглашения по разработке
 
