@@ -31,3 +31,7 @@ next-env.d.ts
 # ide
 .idea
 .vscode
+
+# nx
+.nx/cache
+.nx/workspace-data

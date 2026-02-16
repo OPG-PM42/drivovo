@@ -1,4 +1,4 @@
-interface CountryEntity {
+export interface CountryEntity {
     id: string;
     name: string;
     iso2: string;
