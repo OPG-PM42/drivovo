@@ -1,0 +1,16 @@
+{
+  "name": "fastify-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seedDB.js"
+  },
+  "dependencies": {
+    "@fastify/env": "^5.0.3",
+    "@fastify/postgres": "^6.0.2",
+    "fastify": "^5.7.4",
+    "fastify-cli": "^7.4.1",
+    "pg": "^8.18.0"
+  }
+}
