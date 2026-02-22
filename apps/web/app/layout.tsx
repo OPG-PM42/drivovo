@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+
 import "./globals.css";
+import { StateProvider } from '@/ui/providers/state';
 
 export const metadata: Metadata = {
   title: "Drivovo",
@@ -11,7 +13,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>): React.ReactElement {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><StateProvider>{children}</StateProvider></body>
     </html>
   );
 }

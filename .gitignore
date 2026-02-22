@@ -35,3 +35,6 @@ next-env.d.ts
 # nx
 .nx/cache
 .nx/workspace-data
+
+.angular
+tmp/
