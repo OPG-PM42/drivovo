@@ -3,6 +3,8 @@
   "compilerOptions": {},
   "files": [],
   "references": [
-    { "path": "./apps/web" }
+    { "path": "./apps/web" },
+    { "path": "./apps/admin" },
+    { "path": "./apps/backend" }
   ]
 }
