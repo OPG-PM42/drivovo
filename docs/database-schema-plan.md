@@ -85,8 +85,8 @@
    │  │ id         UUID PK   │          │
    ├──┤ car_id     UUID FK→cars│        │
    │  │ country_id UUID FK→countries│   │
-   │  │ value      DECIMAL   │          │
-   │  │ currency   VARCHAR   │          │
+   │  │ value      DECIMAL(12,2)│        │
+   │  │ currency   VARCHAR(10)│         │
    │  │ UNIQUE(car_id, country_id)│     │
    │  └──────────────────────┘          │
    │                                    │
@@ -118,7 +118,10 @@
    ├──┤ car_id     UUID FK→cars│        │
    │  │ country_id UUID FK→countries│   │
    │  │ name       VARCHAR   │          │
-   │  │ price      DECIMAL   │          │
+   │  │ price      DECIMAL(12,2)│       │
+   │  │ currency   VARCHAR(10)│         │
+   │  │ UNIQUE(tariff_id,     │         │
+   │  │   car_id, country_id) │         │
    │  └──────────────────────┘          │
    │                                    │
    │  ┌──────────────────────┐          │
@@ -131,7 +134,7 @@
    │  │ user_id    UUID FK→users◄───────┘
    │  │ status     ENUM      │
    │  │ term       INT       │
-   │  │ deposit_value DECIMAL│  ← embedded Money
+   │  │ deposit_value DECIMAL(12,2)│ ← embedded Money
    │  │ deposit_currency VARCHAR│
    │  │ created_at TIMESTAMP │
    │  │ updated_at TIMESTAMP │
@@ -144,7 +147,7 @@
    ├──┤ car_id     UUID FK→cars│
    │  │ title      VARCHAR   │
    │  │ description TEXT     │
-   │  │ rating     DECIMAL   │
+   │  │ rating     DECIMAL(3,2)│
    │  │ seo_title  VARCHAR   │  ← embedded SEO
    │  │ seo_description TEXT │
    │  └──────┬───────────────┘
@@ -213,9 +216,12 @@ CREATE INDEX idx_images_parent ON images(parent_id, parent_type);
 -- tariff_options
 CREATE INDEX idx_tariff_options_tariff_id ON tariff_options(tariff_id);
 CREATE INDEX idx_tariff_options_car_country ON tariff_options(car_id, country_id);
+CREATE INDEX idx_tariff_options_country_id ON tariff_options(country_id);
+ALTER TABLE tariff_options ADD CONSTRAINT uq_tariff_option UNIQUE (tariff_id, car_id, country_id);
 
 -- reviews
 CREATE INDEX idx_reviews_car_page_id ON reviews(car_page_id);
+CREATE INDEX idx_reviews_car_page_created ON reviews(car_page_id, created_at DESC);
 
 -- car_pages
 CREATE UNIQUE INDEX idx_car_pages_car_id ON car_pages(car_id);
@@ -718,6 +724,75 @@ const endpointMap = {
 };
 
 runServer({ port, host, endpointMap });
+```
+
+---
+
+## Несоответствия доменной модели (требуют обновления перед реализацией)
+
+Перед реализацией Infrastructure слоя необходимо синхронизировать Domain с новой схемой.
+
+### 1. `CarEntity.price: Price` → `price: Price[]`
+
+**Проблема:** Поле объявлено как единственное значение, но БД хранит цены для нескольких стран.
+
+```typescript
+// БЫЛО (libs/domain/src/entities/car.ts)
+price: Price;
+
+// ДОЛЖНО БЫТЬ
+price: Price[];  // одна запись на каждую страну
+```
+
+### 2. `Option.creditId` — удалить
+
+**Проблема:** Value Object `Option` содержит `creditId`, но в новой схеме `tariff_options` — это каталог опций тарифа (tariff × car × country), не привязанный к конкретному кредиту.
+
+```typescript
+// БЫЛО (libs/domain/src/value-object/option.ts)
+export interface Option {
+  name: string;
+  price: number;
+  carId: string;
+  countryId: string;
+  creditId: string;  // ← удалить
+}
+
+// ДОЛЖНО БЫТЬ
+export interface Option {
+  name: string;
+  price: number;
+  currency: string;  // ← добавить (соответствует tariff_options.currency)
+  carId: string;
+  countryId: string;
+}
+```
+
+Связь «кредит → выбранные опции» реализуется через `credit.tariff.options` (навигация через TariffEntity), а не прямым FK.
+
+### 3. `Image.parentType` — добавить
+
+**Проблема:** VO `Image` не имеет поля `parentType`, а таблица `images` содержит `parent_type` для полиморфной связи.
+
+```typescript
+// БЫЛО (libs/domain/src/value-object/image.ts)
+export interface Image {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+  parentId: string;
+}
+
+// ДОЛЖНО БЫТЬ
+export interface Image {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+  parentId: string;
+  parentType: 'car' | 'car_page_banner';  // ← добавить
+}
 ```
 
 ---
