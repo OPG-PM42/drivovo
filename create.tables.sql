@@ -180,28 +180,14 @@ CREATE TABLE car_pages (
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
     rating          DECIMAL(3, 2),
+    -- Reviews stored as JSONB array: [{rating, comment, author, authorImage}]
+    reviews         JSONB        NOT NULL DEFAULT '[]',
     -- SEO (Value Object embedded)
     seo_title       VARCHAR(255),
     seo_description TEXT,
     UNIQUE (car_id)
 );
 
-CREATE UNIQUE INDEX idx_car_pages_car_id ON car_pages(car_id);
-
--- =============================================
--- reviews  (1:N with car_pages)
--- =============================================
-
-CREATE TABLE reviews (
-    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    car_page_id  UUID         NOT NULL REFERENCES car_pages(id) ON DELETE CASCADE,
-    rating       INT          NOT NULL CHECK (rating BETWEEN 1 AND 5),
-    comment      TEXT,
-    author       VARCHAR(255),
-    author_image VARCHAR(500),
-    created_at   TIMESTAMP    NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMP    NOT NULL DEFAULT now()
-);
-
-CREATE INDEX idx_reviews_car_page_id      ON reviews(car_page_id);
-CREATE INDEX idx_reviews_car_page_created ON reviews(car_page_id, created_at DESC);
+CREATE UNIQUE INDEX idx_car_pages_car_id      ON car_pages(car_id);
+-- GIN index enables efficient containment (@>) and existence (?) queries on reviews JSONB
+CREATE INDEX        idx_car_pages_reviews_gin ON car_pages USING GIN (reviews);

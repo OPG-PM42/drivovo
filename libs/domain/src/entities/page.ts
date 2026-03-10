@@ -10,8 +10,8 @@ export interface SEO {
 export interface Review {
     rating: number;
     comment: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     author: string;
     authorImage: string;
 }

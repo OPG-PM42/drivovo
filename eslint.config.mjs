@@ -45,6 +45,7 @@ const eslintConfig = [
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/no-inferrable-types": "off",
       "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-use-before-define": [
         "error",
         { ignoreTypeReferences: true },

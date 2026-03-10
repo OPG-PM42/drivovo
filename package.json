@@ -13,7 +13,8 @@
     "start:admin": "nx serve admin",
     "lint": "eslint apps/web apps/admin",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "seed": "node seeds/index.js"
   },
   "dependencies": {
     "@angular/common": "~21.1.0",
