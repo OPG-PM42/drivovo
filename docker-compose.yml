@@ -12,6 +12,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      seed:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   admin:
@@ -53,6 +55,17 @@ services:
       timeout: 3s
       retries: 5
     restart: unless-stopped
+
+  seed:
+    build:
+      context: .
+      dockerfile: deploy/docker/seed.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-drivovo}:${POSTGRES_PASSWORD:-drivovo_dev}@db:5432/${POSTGRES_DB:-drivovo}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   pgdata:

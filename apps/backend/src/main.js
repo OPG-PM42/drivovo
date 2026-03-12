@@ -1,10 +1,16 @@
 import Fastify from 'fastify';
 
+import { createPool, closePool } from './infra/db.js';
 import endpointMap from './endpoints/index.js';
 
-// TODO: create nx lib (frameworks) and this function there
-const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {}) => {
+const runServer = async ({ port = 5000, host = '0.0.0.0', endpointMap = {}, databaseUrl } = {}) => {
+  const db = createPool(databaseUrl);
+
   const app = Fastify();
+
+  // Health check
+  app.get('/health', async () => ({ status: 'ok' }));
+
   const endpointEntries = Object.entries(endpointMap);
 
   for (const [namespace, endpoints] of endpointEntries) {
@@ -19,7 +25,7 @@ const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {
           } catch (err) {
             const errInfo = err.code ? endpoint.errors?.[err.code] : null;
             if (errInfo) {
-              return reply.status(errInfo.code).send({ code, error: errInfo.message });
+              return reply.status(errInfo.code).send({ code: err.code, error: errInfo.message });
             }
             return reply.status(500).send({ error: 'Internal Server Error' });
           }
@@ -27,6 +33,16 @@ const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {
       });
     }
   }
+
+  const shutdown = async (signal) => {
+    console.log(`\n${signal} Непредвиденная ошибка, завершаем работу...`);
+    await app.close();
+    await closePool();
+    process.exit(0);
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 
   try {
     await app.listen({ port, host });
@@ -38,7 +54,8 @@ const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {
 };
 
 runServer({
-  port: Number(process.env['PORT'] ?? 3000),
+  port: Number(process.env['PORT'] ?? 5000),
   host: process.env['HOST'] ?? '0.0.0.0',
   endpointMap,
+  databaseUrl: process.env['DATABASE_URL'] ?? 'postgresql://drivovo:drivovo_dev@localhost:5432/drivovo',
 });
