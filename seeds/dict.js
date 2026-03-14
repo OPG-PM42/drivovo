@@ -35,10 +35,17 @@ const INTERIOR_MAP = {
   'textile: Текстиль':     'Textile',
 };
 
-module.exports = {
+const DICT_MAP = {
   ENGINE_TYPE_MAP,
   DRIVE_TYPE_MAP,
   BODY_TYPE_MAP,
   STATUS_MAP,
   INTERIOR_MAP,
 };
+
+const getValue = (dictName, value, defaultValue) => {
+  const dict = DICT_MAP[dictName];
+  return value ? dict[value] ?? defaultValue : defaultValue;
+};
+
+module.exports = { getValue };
