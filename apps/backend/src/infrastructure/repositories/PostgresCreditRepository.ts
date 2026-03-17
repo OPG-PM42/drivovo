@@ -1,5 +1,5 @@
 import type { CreditEntity } from 'domain';
-import type { Pool } from '../pg/mock-pg';
+import { createPool } from '../pg/mock-pg';
 import type {
   ICreditRepository,
   CreateCreditDto,
@@ -115,12 +115,11 @@ const rowToEntity = (row: CreditRow): CreditEntity => ({
     updatedAt: new Date(row.user_updated_at),
   },
 });
-
+const pool = createPool();
 export class PostgresCreditRepository implements ICreditRepository {
-  constructor(private readonly pool: Pool) {}
 
   async findById(id: string): Promise<CreditEntity | null> {
-    const { rows } = await this.pool.query<CreditRow>(
+    const { rows } = await pool.query<CreditRow>(
       `${SELECT_CREDIT_SQL} WHERE c.id = $1`,
       [id]
     );
@@ -128,14 +127,14 @@ export class PostgresCreditRepository implements ICreditRepository {
   }
 
   async findAll(): Promise<CreditEntity[]> {
-    const { rows } = await this.pool.query<CreditRow>(
+    const { rows } = await pool.query<CreditRow>(
       `${SELECT_CREDIT_SQL} ORDER BY c.created_at DESC`
     );
     return rows.map(rowToEntity);
   }
 
   async findByUserId(userId: string): Promise<CreditEntity[]> {
-    const { rows } = await this.pool.query<CreditRow>(
+    const { rows } = await pool.query<CreditRow>(
       `${SELECT_CREDIT_SQL} WHERE c.user_id = $1 ORDER BY c.created_at DESC`,
       [userId]
     );
@@ -143,7 +142,7 @@ export class PostgresCreditRepository implements ICreditRepository {
   }
 
   async create(data: CreateCreditDto): Promise<CreditEntity> {
-    const { rows } = await this.pool.query<{ id: string }>(
+    const { rows } = await pool.query<{ id: string }>(
       `INSERT INTO credits
         (tariff_id, car_id, country_id, user_id, status, term, deposit_value, deposit_currency)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -187,7 +186,7 @@ export class PostgresCreditRepository implements ICreditRepository {
     if (setClauses.length === 0) return this.findById(id);
 
     params.push(id);
-    await this.pool.query(
+    await pool.query(
       `UPDATE credits SET ${setClauses.join(', ')}, updated_at = NOW() WHERE id = $${params.length}`,
       params
     );
@@ -196,6 +195,6 @@ export class PostgresCreditRepository implements ICreditRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM credits WHERE id = $1', [id]);
+    await pool.query('DELETE FROM credits WHERE id = $1', [id]);
   }
 }
