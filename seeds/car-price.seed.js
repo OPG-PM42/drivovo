@@ -1,8 +1,8 @@
 'use strict';
 
-const { pipe, insert } = require('./utils');
+const { insert } = require('./utils');
 
-const format = (countryId) => ({ carId, acf }) => {
+const format = ({ countryId, carId, acf }) => {
   const priceRaw = acf.calculator_props?.car_price_ex_showroom;
   const value = priceRaw ? parseFloat(priceRaw) : null;
   if (!value || isNaN(value)) return null;
@@ -14,6 +14,6 @@ const format = (countryId) => ({ carId, acf }) => {
   };
 };
 
-const insertCarPrice = (countryId) => pipe(format(countryId), insert('car_prices'));
+const insertCarPrice = async (entry) => insert('car_prices')(format(entry));
 
 module.exports = { insertCarPrice };

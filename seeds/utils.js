@@ -3,10 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-let _client = null;
-
-const setClient = (client) => { _client = client; };
-const getClient = () => _client;
+const { getClient } = require('./db');
 
 const pipe = (...fns) => async (x) => {
   let res = x;
@@ -25,13 +22,21 @@ const insert = (tableName) => async (row) => {
   if (!row) return null;
   const keys = Object.keys(row);
   const values = Object.values(row);
-  const { rows } = await _client.query(`
+  const { rows } = await getClient().query(`
     INSERT INTO ${tableName} (${keys.join(',')})
     VALUES (${values.map((_, i) => `$${i + 1}`).join(',')})
     ON CONFLICT DO NOTHING
     RETURNING *
   `, values);
   return rows[0] ?? null;
+};
+
+const many = (fn) => async (rows) => {
+  const results = [];
+  for (const row of rows) {
+    results.push(await fn(row));
+  }
+  return results;
 };
 
 const stripHtml = (html) => {
@@ -45,4 +50,4 @@ const stripHtml = (html) => {
     .trim() || null;
 };
 
-module.exports = { setClient, getClient, pipe, readFile, insert, stripHtml };
+module.exports = { pipe, many, readFile, insert, stripHtml };

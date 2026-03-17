@@ -1,6 +1,6 @@
 'use strict';
 
-const { insert } = require('./utils');
+const { pipe, many, insert } = require('./utils');
 
 const IMAGE_FIELDS = [
   'preview_photo', 'crop_1', 'crop_2', 'crop_3', 'crop_4',
@@ -18,11 +18,9 @@ const format = ({ carId, acf }) =>
       alt: acf.car_name || null,
     }));
 
-const insertCarImages = async (entry) => {
-  const rows = format(entry);
-  for (const row of rows) {
-    await insert('images')(row);
-  }
-};
+const insertCarImages = pipe(
+  format,
+  many(insert('images'))
+);
 
 module.exports = { insertCarImages };

@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const { pool } = require('./db');
-const { setClient, readFile } = require('./utils');
+const { pool, setClient } = require('./db');
+const { readFile } = require('./utils');
 const { insertCountry } = require('./country.seed');
 const { insertTariff } = require('./tariff.seed');
 const { insertCar } = require('./car.seed');
@@ -40,8 +40,6 @@ async function main() {
       await insertTariff(t);
     }
 
-    const addPrice = insertCarPrice(countryId);
-
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       let car = await insertCar(row);
@@ -55,7 +53,7 @@ async function main() {
       const entry = { carId: car.id, acf: row.acf };
 
       await Promise.all([
-        addPrice(entry),
+        insertCarPrice({ countryId, ...entry }),
         insertCarImages(entry),
         insertCarPage(entry),
       ]);

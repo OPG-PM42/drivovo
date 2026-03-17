@@ -8,4 +8,9 @@ const pool = new Pool({
     'postgresql://drivovo:drivovo_dev@localhost:5432/drivovo',
 });
 
-module.exports = { pool };
+let _client = null;
+
+const setClient = (client) => { _client = client; };
+const getClient = () => _client;
+
+module.exports = { pool, setClient, getClient };
