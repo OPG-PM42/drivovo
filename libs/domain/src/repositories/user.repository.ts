@@ -6,7 +6,6 @@ export interface UserSearchParams extends SearchParams {
   cameFrom?: string;
   availabilityDay?: UserEntity['availability']['day'];
   availabilityTime?: UserEntity['availability']['time'];
-  drinks?: UserEntity['drinks'];
 }
 
 export interface UserRepository extends CRUD<UserEntity, UserSearchParams> {
