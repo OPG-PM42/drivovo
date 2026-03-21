@@ -14,12 +14,12 @@ const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {
         url: `/${namespace}${endpoint.path.startsWith('/') ? '' : '/'}${endpoint.path === '/' ? '' : endpoint.path}`,
         handler: async (request, reply) => {
           try {
-            const response = await endpoint.handler(request.params);
+            const response = await endpoint.handler(request.params, request.query);
             return reply.send(response);
           } catch (err) {
             const errInfo = err.code ? endpoint.errors?.[err.code] : null;
             if (errInfo) {
-              return reply.status(errInfo.code).send({ code, error: errInfo.message });
+              return reply.status(errInfo.code).send({ code: errInfo.code, error: errInfo.message });
             }
             return reply.status(500).send({ error: 'Internal Server Error' });
           }
