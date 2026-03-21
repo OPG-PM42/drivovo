@@ -2,5 +2,6 @@ import type { UserEntity } from '../entities';
 import type { CRUD } from './crud';
 
 export interface UserRepository extends CRUD<UserEntity> {
-  // Additional query methods
+  findByEmail(email: string): Promise<UserEntity>;
+  findByPhone(phone: string): Promise<UserEntity>;
 }
