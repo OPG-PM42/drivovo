@@ -1,2 +1,2 @@
-export * from './crud';
-export * from './user.repository';
+export type * from './crud';
+export type * from './user.repository';
