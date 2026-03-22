@@ -1,4 +1,4 @@
-import type { UserEntity, UserSearchParams, UserRepository } from 'domain';
+import type { UserEntity, UserSearchParams, UserRepository } from '@drivovo/domain';
 import type { Pool } from '../pg/mock-pg';
 
 /**
