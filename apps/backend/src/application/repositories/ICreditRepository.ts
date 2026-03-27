@@ -16,11 +16,14 @@ export interface UpdateCreditDto {
   deposit?: CreditEntity['deposit'];
 }
 
-export interface ICreditRepository {
-  findById(id: string): Promise<CreditEntity | null>;
-  findAll(): Promise<CreditEntity[]>;
-  findByUserId(userId: string): Promise<CreditEntity[]>;
-  create(data: CreateCreditDto): Promise<CreditEntity>;
-  update(id: string, data: UpdateCreditDto): Promise<CreditEntity | null>;
+export interface CRUD<E extends object> {
+  findById(id: string): Promise<E | null>;
+  findAll(): Promise<E[]>;
+  create(data: E): Promise<E>;
+  update(id: string, data: Partial<E>): Promise<E | null>;
   delete(id: string): Promise<void>;
 }
+export interface CreditRepository extends CRUD<CreditEntity>{
+  findByUserId(userId: string): Promise<CreditEntity[]>;
+}
+
