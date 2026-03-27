@@ -15,7 +15,8 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
-      "@drivovo/domain": ["libs/domain/src/index.ts"]
+      "@drivovo/domain": ["libs/domain/src/index.ts"],
+      "@drivovo/database": ["libs/database/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
