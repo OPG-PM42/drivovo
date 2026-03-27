@@ -14,7 +14,7 @@ const runServer = async ({ port = 3000, host = '0.0.0.0', endpointMap = {} } = {
         url: `/${namespace}${endpoint.path.startsWith('/') ? '' : '/'}${endpoint.path === '/' ? '' : endpoint.path}`,
         handler: async (request, reply) => {
           try {
-            const response = await endpoint.handler(request.params, request.query);
+            const response = await endpoint.handler(request.method === "GET" ? request.query : request.params);
             return reply.send(response);
           } catch (err) {
             const errInfo = err.code ? endpoint.errors?.[err.code] : null;

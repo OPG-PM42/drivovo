@@ -1,3 +1,3 @@
 export const createCarService = (infra) => ({
-  find: async (params, query = {}) => infra.cars.find(query)
+  find: async (params = {}) => infra.cars.find(params)
 });
