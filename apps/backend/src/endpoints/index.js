@@ -1,4 +1,4 @@
-import domain from '../domain/services';
+import domain from '../domain/services/index.js';
 
 import { createCarEndpoint } from './car';
 
