@@ -1,8 +1,7 @@
 import { createCarService } from './car';
-import { createCarRepository } from '../../../../../libs/database/src/repositories/pg-car.repository';
-import { pool } from '../../../../../libs/database/src/client/pool';
+import { createCarRepository } from '../../repositories/car.repository';
 
-const carRepository = createCarRepository(pool);
+const carRepository = createCarRepository();
 
 export default {
   cars: createCarService({ cars: carRepository }),
