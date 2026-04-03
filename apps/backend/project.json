@@ -19,7 +19,7 @@
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
-          "external": ["pg"],
+          "external": ["pg", "kysely"],
           "outExtension": {
             ".js": ".js"
           }
@@ -30,7 +30,7 @@
         "production": {
           "esbuildOptions": {
             "sourcemap": false,
-            "external": ["pg"],
+            "external": ["pg", "kysely"],
             "outExtension": {
               ".js": ".js"
             }

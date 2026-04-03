@@ -1,9 +1,10 @@
 import { createCarService } from '../domain/services';
-import { createMockCarRepository } from '../infrastructure/car.repository';
+import { createCarRepository } from '../infrastructure/car.repository.kysely';
+import { db } from '../infrastructure/kysely';
 
 import { createCarEndpoint } from './car';
 
-const carRepository = createMockCarRepository();
+const carRepository = createCarRepository(db);
 const domain = {
   cars: createCarService({ cars: carRepository }),
 };
