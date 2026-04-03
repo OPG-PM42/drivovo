@@ -1,3 +1,5 @@
+import { RepositoryError } from '../errors';
+
 const MOCK_CARS = [
   {
     id: '1',
@@ -55,11 +57,16 @@ const MOCK_CARS = [
 const FILTERABLE_FIELDS = ['brand', 'type', 'status', 'driveType', 'color'];
 
 export const createMockCarRepository = () => ({
-  find: async (query = {}) =>
-    MOCK_CARS.filter((car) =>
-      FILTERABLE_FIELDS.every((field) => {
-        const value = query[field];
-        return !value ? true : car[field] === value;
-      })
-    ),
+  find: async (query = {}) => {
+    try {
+      return MOCK_CARS.filter((car) =>
+        FILTERABLE_FIELDS.every((field) => {
+          const value = query[field];
+          return !value ? true : car[field] === value;
+        })
+      );
+    } catch (err) {
+      throw new RepositoryError('Failed to fetch cars', err);
+    }
+  },
 });
