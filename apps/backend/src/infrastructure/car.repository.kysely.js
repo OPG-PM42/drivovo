@@ -17,39 +17,12 @@ const SORT_COLUMN_MAP = {
   color: 'color',
 };
 
-function groupBy(array, key) {
-  return array.reduce((acc, item) => {
-    const group = item[key];
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(item);
-    return acc;
-  }, {});
-}
-
-function mapCarRow(row, imagesByCarId, priceByCarId) {
-  const images = (imagesByCarId[row.id] || []).map((img) => ({
-    url: img.url,
-    alt: img.alt,
-    width: img.width,
-    height: img.height,
-    parentId: img.parent_id,
-  }));
-
-  const priceRow = priceByCarId[row.id];
-  const price = priceRow
-    ? {
-        value: Number(priceRow.value),
-        currency: priceRow.currency,
-        countryId: priceRow.country_id,
-        carId: priceRow.car_id,
-      }
-    : null;
-
+/** Maps a snake_case DB row to a camelCase CarEntity. */
+function mapCarRow(row) {
   return {
     id: row.id,
     name: row.name,
     brand: row.brand,
-    images,
     description: row.description,
     driveType: row.drive_type,
     type: row.type,
@@ -64,7 +37,6 @@ function mapCarRow(row, imagesByCarId, priceByCarId) {
     interiorTrim: row.interior_trim,
     status: row.status,
     color: row.color,
-    price,
   };
 }
 
@@ -89,29 +61,7 @@ export const createCarRepository = (db) => ({
 
       const cars = await query.execute();
 
-      if (cars.length === 0) return [];
-
-      const carIds = cars.map((c) => c.id);
-
-      const images = await db
-        .selectFrom('images')
-        .selectAll()
-        .where('parent_id', 'in', carIds)
-        .where('parent_type', '=', 'car')
-        .execute()
-        .catch(() => []);
-
-      const prices = await db
-        .selectFrom('car_prices')
-        .selectAll()
-        .where('car_id', 'in', carIds)
-        .execute()
-        .catch(() => []);
-
-      const imagesByCarId = groupBy(images, 'parent_id');
-      const priceByCarId = Object.fromEntries(prices.map((p) => [p.car_id, p]));
-
-      return cars.map((car) => mapCarRow(car, imagesByCarId, priceByCarId));
+      return cars.map(mapCarRow);
     } catch (err) {
       throw new RepositoryError('Failed to fetch cars', err);
     }
