@@ -38,3 +38,6 @@ next-env.d.ts
 
 .angular
 tmp/
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json
