@@ -3,5 +3,4 @@ export interface Image {
     alt: string;
     width: number;
     height: number;
-    parentId: string;
 }
