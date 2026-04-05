@@ -1,4 +1,4 @@
-import { RepositoryError } from '../errors';
+import { RepositoryError } from '../errors/repository.error.js';
 
 const FILTER_MAP = {
   brand: 'brand',
@@ -63,7 +63,7 @@ export const createCarRepository = (db) => ({
 
       return cars.map(mapCarRow);
     } catch (err) {
-      throw new RepositoryError('Failed to fetch cars', err);
+      throw RepositoryError.from(err);
     }
   },
 });
