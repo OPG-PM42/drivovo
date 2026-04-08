@@ -14,10 +14,11 @@ const SORT_FIELD_MAP = {
   status: 'status',
 } as const;
 
-interface CarRepository extends Repository<CarEntity> {}
+type CarSearchParams = SearchParams<'name' | 'brand' | 'status'>;
+interface CarRepository extends Repository<CarEntity, CarSearchParams> {}
 
 export default {
-  async find(params: SearchParams<'name' | 'brand' | 'status'>): Promise<CarEntity[]> {
+  async find(params: CarSearchParams): Promise<CarEntity[]> {
     try {
       const rows = await db
         .selectFrom('cars')
