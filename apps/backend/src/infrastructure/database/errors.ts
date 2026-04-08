@@ -47,6 +47,9 @@ export class RepositoryError extends Error {
   public readonly name: string = 'RepositoryError';
 
   static create(error: any) {
+    if (error instanceof RepositoryError) {
+      return error;
+    }
     const { code, message } = error?.code ? PG_ERROR_MAP[error.code] : { code: DATABASE_ERRORS.UNKNOWN_ERROR, message: 'Unknown Repository Error' };
     return new RepositoryError(code, message, { cause: error });
   }

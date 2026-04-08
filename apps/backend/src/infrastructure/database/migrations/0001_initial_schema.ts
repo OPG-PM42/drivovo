@@ -145,9 +145,46 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await sql`CREATE INDEX idx_orders_tariff_id ON orders USING btree (tariff_id)`.execute(db);
   await sql`CREATE UNIQUE INDEX idx_users_email ON users USING btree (email)`.execute(db);
   await sql`CREATE INDEX idx_users_phone ON users USING btree (phone)`.execute(db);
+
+  // Views
+  await sql`
+    CREATE OR REPLACE VIEW car_page_entity AS
+    SELECT
+      cp.id          AS page_id,
+      cp.title       AS page_title,
+      cp.description AS page_description,
+      cp.rating,
+      cp.reviews,
+      cp.seo_title,
+      cp.seo_description,
+      cp.banners,
+      c.id           AS car_id,
+      c.name         AS car_name,
+      c.brand,
+      c.description  AS car_description,
+      c.drive_type,
+      c.type         AS car_type,
+      c.url          AS car_url,
+      c.acceleration,
+      c.power,
+      c.color,
+      c.interior_trim,
+      c.status,
+      c.engine_type,
+      c.engine_capacity,
+      c.engine_fuel_cons,
+      c.images       AS car_images,
+      pr.value       AS price_value,
+      pr.currency    AS price_currency,
+      pr.country_id  AS price_country_id
+    FROM car_pages cp
+    INNER JOIN cars c ON c.id = cp.car_id
+    LEFT JOIN car_prices pr ON pr.car_id = c.id
+  `.execute(db);
 }
 
 export async function down(db: Kysely<unknown>): Promise<void> {
+  await sql`DROP VIEW IF EXISTS car_page_entity`.execute(db);
   await sql`DROP TABLE IF EXISTS credits CASCADE`.execute(db);
   await sql`DROP TABLE IF EXISTS orders CASCADE`.execute(db);
   await sql`DROP TABLE IF EXISTS car_prices CASCADE`.execute(db);
