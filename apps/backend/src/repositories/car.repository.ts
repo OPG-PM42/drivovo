@@ -6,7 +6,7 @@ import {
   createCarEntity,
 } from "../infrastructure/database/tables";
 import type { Repository, SearchParams } from "./repository";
-import { RepositoryError } from "../infrastructure/database/errors";
+import { DATABASE_ERRORS, RepositoryError } from "../infrastructure/database/errors";
 
 const SORT_FIELD_MAP = {
   name: 'name',
@@ -43,7 +43,10 @@ export default {
         .selectAll()
         .where('id', '=', id)
         .executeTakeFirstOrThrow(
-          () => new Error(`Car with id ${id} not found`)
+          () => new RepositoryError(
+            DATABASE_ERRORS.NOT_FOUND_ERROR,
+            `Car with id ${id} not found`
+          )
         );
 
       return createCarEntity(row);
