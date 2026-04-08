@@ -41,50 +41,6 @@ export function createCarPageTable(entity: CarPageEntity): Insertable<CarPagesTa
   };
 }
 
-export function createCarPageQuery(params?: SearchParams) {
-  let query = db
-    .selectFrom('car_pages')
-    .innerJoin('cars', 'cars.id', 'car_pages.car_id')
-    .leftJoin('car_prices', 'car_prices.car_id', 'cars.id')
-    .select([
-      'car_pages.id as page_id',
-      'car_pages.title as page_title',
-      'car_pages.description as page_description',
-      'car_pages.rating',
-      'car_pages.reviews',
-      'car_pages.seo_title',
-      'car_pages.seo_description',
-      'car_pages.banners',
-      'cars.id as car_id',
-      'cars.name as car_name',
-      'cars.brand',
-      'cars.description as car_description',
-      'cars.drive_type',
-      'cars.type as car_type',
-      'cars.url as car_url',
-      'cars.acceleration',
-      'cars.power',
-      'cars.color',
-      'cars.interior_trim',
-      'cars.status',
-      'cars.engine_type',
-      'cars.engine_capacity',
-      'cars.engine_fuel_cons',
-      'cars.images as car_images',
-      'car_prices.value as price_value',
-      'car_prices.currency as price_currency',
-      'car_prices.country_id as price_country_id',
-    ]);
-
-  if (params?.sortField && SORT_FIELD_MAP[params.sortField]) {
-    query = query.orderBy(SORT_FIELD_MAP[params.sortField] as any, params.sortOrder?.toLowerCase() as OrderByModifiers);
-  }
-  if (params?.limit) query = query.limit(params.limit);
-  if (params?.offset) query = query.offset(params.offset);
-
-  return query;
-}
-
 export function createCarPageEntity(row: PageRow): CarPageEntity {
   const price = row.price_value != null
     ? { value: row.price_value, currency: row.price_currency!, countryId: row.price_country_id!, carId: row.car_id }
@@ -128,4 +84,48 @@ export function createCarPageUpdates(entity: Partial<CarPageEntity>): Updateable
     }
   }
   return result;
+}
+
+export function createCarPageQuery(params?: SearchParams) {
+  let query = db
+    .selectFrom('car_pages')
+    .innerJoin('cars', 'cars.id', 'car_pages.car_id')
+    .leftJoin('car_prices', 'car_prices.car_id', 'cars.id')
+    .select([
+      'car_pages.id as page_id',
+      'car_pages.title as page_title',
+      'car_pages.description as page_description',
+      'car_pages.rating',
+      'car_pages.reviews',
+      'car_pages.seo_title',
+      'car_pages.seo_description',
+      'car_pages.banners',
+      'cars.id as car_id',
+      'cars.name as car_name',
+      'cars.brand',
+      'cars.description as car_description',
+      'cars.drive_type',
+      'cars.type as car_type',
+      'cars.url as car_url',
+      'cars.acceleration',
+      'cars.power',
+      'cars.color',
+      'cars.interior_trim',
+      'cars.status',
+      'cars.engine_type',
+      'cars.engine_capacity',
+      'cars.engine_fuel_cons',
+      'cars.images as car_images',
+      'car_prices.value as price_value',
+      'car_prices.currency as price_currency',
+      'car_prices.country_id as price_country_id',
+    ]);
+
+  if (params?.sortField && SORT_FIELD_MAP[params.sortField]) {
+    query = query.orderBy(SORT_FIELD_MAP[params.sortField] as any, params.sortOrder?.toLowerCase() as OrderByModifiers);
+  }
+  if (params?.limit) query = query.limit(params.limit);
+  if (params?.offset) query = query.offset(params.offset);
+
+  return query;
 }
