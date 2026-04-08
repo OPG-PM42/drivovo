@@ -3,10 +3,10 @@ import type { CarEntity, Price } from '@drivovo/domain';
 import { createImage, createImageJson } from './image';
 import type { ImageJson } from './image';
 
-type FuelType = 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'other';
-type CarStatus = 'available' | 'order';
-type CarType = 'sedan' | 'hatchback' | 'suv' | 'mpv' | 'coupe' | 'convertible' | 'van' | 'pickup' | 'bus' | 'other';
-type DriveType = 'FWD' | 'RWD' | 'AWD';
+export type FuelType = 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'other';
+export type CarStatus = 'available' | 'order';
+export type CarType = 'sedan' | 'hatchback' | 'suv' | 'mpv' | 'coupe' | 'convertible' | 'van' | 'pickup' | 'bus' | 'other';
+export type DriveType = 'FWD' | 'RWD' | 'AWD';
 
 export interface CarsTable {
   id: Generated<string>;

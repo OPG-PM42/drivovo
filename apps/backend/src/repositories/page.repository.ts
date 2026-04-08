@@ -1,20 +1,34 @@
 import type { CarPageEntity } from "@drivovo/domain";
+import type { OrderByModifiers } from "kysely";
 import db from "../infrastructure/database";
 import {
   createCarPageTable,
   createCarPageUpdates,
-  createCarPageQuery,
   createCarPageEntity,
 } from "../infrastructure/database/tables";
 import type { Repository, SearchParams } from "./repository";
-import { RepositoryError } from "../infrastructure/database/errors";
+import { DATABASE_ERRORS, RepositoryError } from "../infrastructure/database/errors";
+
+const SORT_FIELD_MAP = {
+  title: 'page_title',
+  rating: 'rating',
+} as const;
 
 interface PageRepository extends Repository<CarPageEntity> {}
 
 export default {
-  async find(params: SearchParams): Promise<CarPageEntity[]> {
+  async find(params: SearchParams<'title' | 'rating'>): Promise<CarPageEntity[]> {
     try {
-      const rows = await createCarPageQuery(params).execute();
+      const rows = await db
+        .selectFrom('car_page_entity')
+        .selectAll()
+        .$if(Boolean(params?.sortField && SORT_FIELD_MAP[params.sortField]), (query) =>
+          query.orderBy(SORT_FIELD_MAP[params.sortField!], params.sortOrder),
+        )
+        .$if(Boolean(params?.limit), (query) => query.limit(params.limit!))
+        .$if(Boolean(params?.offset), (query) => query.offset(params.offset!))
+        .execute();
+
       return rows.map(createCarPageEntity);
     } catch (error) {
       throw RepositoryError.create(error);
@@ -23,9 +37,16 @@ export default {
 
   async findOne(id: string): Promise<CarPageEntity> {
     try {
-      const row = await createCarPageQuery()
-        .where('car_pages.id', '=', id)
-        .executeTakeFirstOrThrow(() => new Error(`CarPage with id ${id} not found`));
+      const row = await db
+        .selectFrom('car_page_entity')
+        .selectAll()
+        .where('page_id', '=', id)
+        .executeTakeFirstOrThrow(() => 
+          new RepositoryError(
+            DATABASE_ERRORS.NOT_FOUND_ERROR,
+            `CarPage with id ${id} not found`
+          )
+        );
 
       return createCarPageEntity(row);
     } catch (error) {

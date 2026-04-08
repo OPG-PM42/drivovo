@@ -1,333 +1,92 @@
+-- Seed data for Drivovo
 --
--- PostgreSQL database dump
---
-
-\restrict lap19b0riJYmC4yLOH2L2vInzMcNyU6msm59dhl0CJT5vb74h1SDbDJZbzFBhpz
-
--- Dumped from database version 16.13
--- Dumped by pg_dump version 16.13
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: drivovo
+-- Order respects FK dependencies
 --
 
--- *not* creating schema, since initdb creates it
-
-
-ALTER SCHEMA public OWNER TO drivovo;
-
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: drivovo
---
-
-COMMENT ON SCHEMA public IS '';
-
-
---
--- Name: availability_day; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.availability_day AS ENUM (
-    'today',
-    'tomorrow',
-    'weekend'
-);
-
-
-ALTER TYPE public.availability_day OWNER TO drivovo;
-
---
--- Name: availability_time; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.availability_time AS ENUM (
-    'morning',
-    'afternoon',
-    'evening'
-);
-
-
-ALTER TYPE public.availability_time OWNER TO drivovo;
-
---
--- Name: car_status; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.car_status AS ENUM (
-    'available',
-    'order'
-);
-
-
-ALTER TYPE public.car_status OWNER TO drivovo;
-
---
--- Name: car_type; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.car_type AS ENUM (
-    'sedan',
-    'hatchback',
-    'suv',
-    'mpv',
-    'coupe',
-    'convertible',
-    'van',
-    'pickup',
-    'bus',
-    'other'
-);
-
-
-ALTER TYPE public.car_type OWNER TO drivovo;
-
---
--- Name: credit_status; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.credit_status AS ENUM (
-    'pending',
-    'approved',
-    'rejected'
-);
-
-
-ALTER TYPE public.credit_status OWNER TO drivovo;
-
---
--- Name: drinks_type; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.drinks_type AS ENUM (
-    'coffee',
-    'tea'
-);
-
-
-ALTER TYPE public.drinks_type OWNER TO drivovo;
-
---
--- Name: drive_type; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.drive_type AS ENUM (
-    'FWD',
-    'RWD',
-    'AWD'
-);
-
-
-ALTER TYPE public.drive_type OWNER TO drivovo;
-
---
--- Name: driving_experience; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.driving_experience AS ENUM (
-    'beginner',
-    'intermediate',
-    'advanced'
-);
-
-
-ALTER TYPE public.driving_experience OWNER TO drivovo;
-
---
--- Name: fuel_type; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.fuel_type AS ENUM (
-    'petrol',
-    'diesel',
-    'electric',
-    'hybrid',
-    'other'
-);
-
-
-ALTER TYPE public.fuel_type OWNER TO drivovo;
-
-
---
--- Name: tariff_type; Type: TYPE; Schema: public; Owner: drivovo
---
-
-CREATE TYPE public.tariff_type AS ENUM (
-    'leasing',
-    'subscription'
-);
-
-
-ALTER TYPE public.tariff_type OWNER TO drivovo;
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: car_pages; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.car_pages (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    car_id uuid NOT NULL,
-    title character varying(255) NOT NULL,
-    description text,
-    rating numeric(3,2),
-    reviews jsonb DEFAULT '[]'::jsonb NOT NULL,
-    seo_title character varying(255),
-    seo_description text,
-    banners jsonb DEFAULT '[]'::jsonb NOT NULL
-);
-
-
-ALTER TABLE public.car_pages OWNER TO drivovo;
-
---
--- Name: car_prices; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.car_prices (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    car_id uuid NOT NULL,
-    country_id uuid NOT NULL,
-    value numeric(12,2) NOT NULL,
-    currency character varying(10) NOT NULL
-);
-
-
-ALTER TABLE public.car_prices OWNER TO drivovo;
-
---
--- Name: cars; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.cars (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name character varying(255) NOT NULL,
-    brand character varying(100) NOT NULL,
-    description text,
-    drive_type public.drive_type NOT NULL,
-    type public.car_type NOT NULL,
-    url character varying(500),
-    acceleration character varying(50),
-    power character varying(50),
-    color character varying(100),
-    interior_trim character varying(255),
-    status public.car_status DEFAULT 'available'::public.car_status NOT NULL,
-    engine_type public.fuel_type NOT NULL,
-    engine_capacity character varying(50),
-    engine_fuel_cons character varying(50),
-    images jsonb DEFAULT '[]'::jsonb NOT NULL
-);
-
-
-ALTER TABLE public.cars OWNER TO drivovo;
-
---
--- Name: countries; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.countries (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name character varying(100) NOT NULL,
-    iso2 character(2) NOT NULL,
-    iso3 character(3) NOT NULL,
-    phone_code character varying(20),
-    currency character varying(10) NOT NULL
-);
-
-
-ALTER TABLE public.countries OWNER TO drivovo;
-
---
--- Name: credits; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.credits (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    car_id uuid NOT NULL,
-    tariff_id uuid NOT NULL,
-    country_id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    status public.credit_status DEFAULT 'pending'::public.credit_status NOT NULL,
-    term integer,
-    deposit_value numeric(12,2),
-    deposit_currency character varying(10),
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL
-);
-
-
-ALTER TABLE public.credits OWNER TO drivovo;
-
-
---
--- Name: orders; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.orders (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    tariff_id uuid NOT NULL,
-    car_id uuid NOT NULL,
-    country_id uuid NOT NULL,
-    name character varying(255) NOT NULL,
-    price numeric(12,2) NOT NULL,
-    currency character varying(10) NOT NULL
-);
-
-
-ALTER TABLE public.orders OWNER TO drivovo;
-
---
--- Name: subscriptions; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.subscriptions (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    type public.tariff_type NOT NULL,
-    name character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.subscriptions OWNER TO drivovo;
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: drivovo
---
-
-CREATE TABLE public.users (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name character varying(100),
-    email character varying(255),
-    phone character varying(50),
-    driving_exp public.driving_experience,
-    came_from character varying(255),
-    avail_day public.availability_day,
-    avail_time public.availability_time,
-    drinks public.drinks_type,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL
-);
-
-
-ALTER TABLE public.users OWNER TO drivovo;
-
---
--- Data for Name: car_pages; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
+-- countries
+INSERT INTO public.countries VALUES ('6274aca2-f334-4094-9e47-6c5a4e280be1', 'Ukraine', 'UA', 'UKR', '+380', 'UAH');
+INSERT INTO public.countries VALUES ('058f12f1-3bf6-497f-8e1c-5361c54f8b85', 'Poland', 'PL', 'POL', '+48', 'PLN');
+
+-- subscriptions
+INSERT INTO public.subscriptions VALUES ('f12b0d91-ce07-47dc-b243-c247fde3e652', 'leasing', 'Leasing');
+INSERT INTO public.subscriptions VALUES ('4361a659-76b0-458f-b2d2-81cfda28c8fc', 'subscription', 'Subscription');
+
+-- cars
+INSERT INTO public.cars VALUES ('ed05f534-f9db-4ff3-86d0-9fc52a600d28', 'VW Tiguan R-Line', 'VW', '<p>Та й за наповненням справжній космос!</p>
+<p>VW Tiguan R-Line створений вражати: потужний, зручний та максимально диджиталізований, цей позашляховик здобуде прихильність поціновувачів драйву та поправді прогресивного дизайну.</p>
+<p>Заціни Tiguan R-Line на тест-драйві від Drivovo!</p>
+<p>Drive IT easy!</p>
+', 'AWD', 'suv', 'vw-tiguan-rline', '6.2 сек', '220 к.с.', NULL, 'Combined', 'available', 'petrol', '2.0 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-28.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-22.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-21.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-23.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-28.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('59a8b950-1194-4a76-a12b-29890e001fe0', 'Audi Q5 S-Line', 'audi', '<p>Автосервіс про твої життєві плани та інтереси.</p>
+<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
+<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
+', 'AWD', 'suv', 'audi-q5-s-line-black', '6.1 сек', '249 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '10', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-12.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-14.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-13.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-12.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('4be2ac97-7b2c-4026-a4db-e8857ed6cfb3', 'AUDI Q7 S-Line', 'audi', '<p>Автосервіс про твої життєві плани та інтереси.</p>
+<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
+<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
+', 'AWD', 'suv', 'audi-q7-50-tdi', '6.9', '286 к.с.', NULL, 'Leather', 'order', 'diesel', '3.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-1-6.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55-11.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52-11.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.57-10.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-1-6.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('d875c8a9-c080-4904-9a2a-171c1d8be473', 'Audi Q8 S-Line', 'audi', '<p>Найкомфортніший SUV від AUDI, що без вагань вмістить 5 осіб та купу валіз і це буде зручно!</p>
+<p>Більш детально про цього велетня дивись на відео, він вартий твоєї уваги!</p>
+<p>Запишись на тест-драйв Audi Q8 50 TDI quattro S line , оформлюй підписку та насолоджуйся його вишуканістю та комфортом!</p>
+<p>Drive IT easy!</p>
+', 'AWD', 'suv', 'audi-q8-50-tdi', '6.3 сек', '286 к.с.', NULL, 'Leather', 'available', 'diesel', '3.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-4-4.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55-14.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52-15.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.57-14.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-4-4.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('36b9355c-86e4-4e8f-98be-7d0a65d4d122', 'BMW X5 xDrive 30d', 'BMW', '<p>Автосервіс про твої життєві плани та інтереси.</p>
+<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
+<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
+', 'AWD', 'suv', 'bmw-x5-30d', '6.5 сек', '265 к.с.', NULL, 'Leather', 'available', 'diesel', '3.0 л.', '7.7', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-151-1.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-150.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-147.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-149.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-151-1.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('77fc1d11-001b-42a7-856c-e10a3881b8fa', 'Cupra Formentor VZ ', 'Cupra', '<p>Настав час це виправити, адже Formentor можна порівняти з ковтком свіжого повітря після довгого дня в офісі.</p>
+<p>Він потужний, керований, компактний та стильний, як і всі представники концерну Volkswagen Audi Group, але ефектно відрізняється від більшості з них.</p>
+<p>Drive IT easy!</p>
+', 'AWD', 'suv', 'cupra-formentor-vz', '4.9 сек', '310 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '13', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-27.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-2.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-1.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-3.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-27.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('e908ecea-321b-4273-bf88-32e42bdc8e3e', 'Mercedes-Benz GLS-Class', 'Mercedes-Benz', '<p>Автосервіс про твої життєві плани та інтереси.</p>
+<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
+<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
+', 'AWD', 'suv', 'mercedes-gls-400d', '6.3 сек', '326 к.с.', NULL, 'Leather', 'order', 'diesel', '3.0 л', '7.6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-113.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.46.38-1-kopiya.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-113.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('0e4e5a87-7d15-4e36-92a9-8a39392d915a', 'Porsche Macan', 'Porsche', '<p>З кожною поїздкою по місту або по дорозі на відпочинок, ти будеш насолоджуватися почуттям абсолютної свободи. А глядачі на вулиці будуть лише заздрити твоєму бездоганному стилю та потужності.</p>
+<p>Нехай синій колір Miami Blue занурить тебе у світ розкоші та ексклюзивності, а підписка на авто Drivovo забезпечить безтурботну їзду, завжди насичену емоціями та драйвом.</p>
+<p>Drive IT easy!</p>
+', 'AWD', 'suv', 'porsche-macan', '6.4 сек', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-1131.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Gemini_Generated_Image_cu7ka7cu7ka7cu7k.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Gemini_Generated_Image_50xqau50xqau50xq1.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.46.38-1.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-1131.webp", "alt": "Porsche Macan", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('96df0494-350f-4d5f-af9e-68ca23b34891', 'Toyota RAV4 hybrid', 'Toyota', '<p>Його ставлять у приклад, проводжають поглядом та хочуть всі🤤</p>
+<p>Щоб стати до нього ближче, потрібен правильний контакт, і для тебе це — DRIVOVO.</p>
+<p>Розглянь цього красунчика ближче у нашому новому відеоогляді та скоріш бронюй тест-драйв📲</p>
+<p>Drive IT easy!</p>
+', 'AWD', 'suv', 'toyota-rav4-hybrid-style', '8.0 сек', '222 к.с.', NULL, 'Leather', 'available', 'hybrid', '2.5 л', '6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-5.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-7.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-4.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-6.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-5.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('546ba37f-46cb-44fe-b268-63eada8d9d24', 'VW T-Roc Style', 'VW', '<p>Наші клієнти замовляють його пачками, а твій сусід тихенько плаче в ночі над його фоткою.</p>
+<p>Що ж такого класного в VW T-Roc Style? Дивись у нашому відосі!🎥</p>
+<p>Drive IT easy!</p>
+', 'FWD', 'suv', 'vw-t-roc-style-white', '8.4 сек', '150 к.с.', NULL, 'Textile', 'available', 'petrol', '1.5 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-131.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-130.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-127.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-129.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-131.webp", "alt": "VW T-Roc Style", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('a6969073-5ada-4784-9901-fa5a3a090af7', 'Audi A6 S-line', 'audi', '<p class="p1"><span class="s1"><b>Audi A6</b></span> — це еталон стилю, комфорту та технологічності у сегменті бізнес-седанів. Вишуканий дизайн, потужні бензинові та дизельні двигуни, а також інноваційні системи допомоги водієві створюють винятковий досвід керування. Просторий салон і бездоганна шумоізоляція роблять кожну поїздку комфортною.</p>
+<p class="p1">Обирайте <span class="s1"><b>Audi A6 за підпискою</b></span> — керуйте авто преміум-класу без довгострокових зобов’язань. <span class="s1"><b>Підписка на авто</b></span> — це новий спосіб володіння, який дозволяє вам отримати максимум свободи, сервісу й емоцій без бюрократії.</p>
+', 'AWD', 'suv', 'audi-a6-45-tfsi', '6,0 с', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', NULL, '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-3-2.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-15.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-16.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-17.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-3-2.webp", "alt": "Audi A6 S-line", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('3b968137-a79e-4cda-b373-497b689da090', 'Audi A7 45 TFSI', 'audi', '<p class="p1">Його лінії — як постріл у серце. Його образ — це про стиль, статус і спокій упевненого руху 😎</p>
+<p class="p1">Щоб наблизитись до нього — потрібен лише один правильний крок, і це — DRIVOVO.</p>
+<p class="p1">Зазирни у відеоогляд цього красеня та бронюй тест-драйв уже зараз📲</p>
+<p class="p3">Drive IT easy!<b></b></p>
+', 'AWD', 'sedan', 'audi-a7-45-tfsi', '6.2 сек', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '6.8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-30.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-32.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-31.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-33.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-30.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('56f71b72-5a4d-4e9f-b8ed-6e4504e3b7cd', 'Touareg R-line 3.0 TDI', 'VW', '<p class="p1">Він не просто їде — він демонструє характер.</p>
+<p class="p1">Volkswagen Touareg R-Line — для тих, хто звик брати своє впевнено💪</p>
+<p class="p1">Наблизитись до нього легко — просто обери DRIVOVO.</p>
+<p class="p1">Дивись відеоогляд і бронюй тест-драйв вже зараз📲</p>
+<p class="p3"><b>Drive IT easy!</b><b></b></p>
+', 'AWD', 'suv', 'vw-touareg-r-line', '6.1 сек', '286 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '8.1', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-18.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-17.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-16.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-19.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-18.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('bf08ea70-70fc-43dd-86af-3d3df2332e4a', 'Cupra Terramar ', 'Cupra', NULL, 'AWD', 'suv', 'cupra-terramar-vz', '5.5 сек', '265 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8.4', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-8.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-10.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-9.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-11.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-8.webp", "alt": "Cupra Terramar ", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('f8467957-2266-49ed-8de0-19f7a5f8b184', 'Toyota Prado', 'Toyota', NULL, 'AWD', 'suv', 'toyota-prado', '8.6 сек', '204 к.с.', NULL, 'Leather', 'available', 'diesel', '2.8 л', '9.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-13.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-18.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-19.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-20.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-13.webp", "alt": "Toyota Prado", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('2f4bbdbf-2786-44c6-8214-325c3907ddba', 'Porsche Cayenne', 'Porsche', NULL, 'AWD', 'suv', 'porsche-cayenne', '6.0 сек', '353 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.4', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-36.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-17.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-18.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-19.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-6-2.webp", "alt": "Porsche Cayenne", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('5732f653-05fd-438e-a32d-ed05deddfaa1', 'Porsche Panamera', 'Porsche', NULL, 'AWD', 'suv', 'porsche-panamera-pl', '5.3 сек', '353 к.с.', NULL, 'Leather', 'available', 'petrol', '2.9 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-35.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-39.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-38.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-40.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-35.webp", "alt": "Porsche Panamera", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('e6c2b8d2-442b-4163-a69e-ee9ec6bb41c0', 'Mercedes GLC 300 4MATIC', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-glc-300-4matic', '6.2 сек', '258 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-161.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-160.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-157.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-159.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-161.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('91e038c6-600e-468f-90e8-33cb4674e00f', 'Mercedes-Benz GLE', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-gle-350de-4matic', '6.8 сек', '320 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-121-1.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-120.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-117.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-119.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-121-1.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('359746e7-0cd9-4f27-af31-4dec0f1564ac', 'Mercedes-Benz GLE 300 d 4MATIC Coupe', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-gle-300d-coupe', '6.8 сек', '269 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-141.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-140.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-137.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-139.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-141.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('524ba971-5f04-4076-b290-b7b883de4b37', 'BMW X7', 'BMW', NULL, 'AWD', 'suv', 'bmw-x7', '5.8 сек', '381 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-191-1.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-190.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-187.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-189.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-191-1.webp", "alt": "BMW X7", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('7b376c86-ecea-416c-8d8f-209c8b28490d', 'Lexus RX', 'Lexus', NULL, 'AWD', 'suv', 'lexus-rx', '7.9  сек', '279 к.с.', NULL, 'Leather', 'order', 'petrol', '2.4 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-181.webp", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-180.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-177.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-179.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-181.webp", "alt": "Lexus RX", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('98728181-0862-48f0-9a47-36d86f2d4bad', 'Lexus LX', 'Lexus', NULL, 'AWD', 'suv', 'lexus-lx', '7.7 сек', '299 к.с.', NULL, 'Leather', 'order', 'diesel', '3.4 л', '10', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-202.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-201.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-198.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-200.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-202.webp", "alt": "Lexus LX", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('872d66c6-5bcc-480c-b294-5081a7e97150', 'Skoda Octavia', 'Skoda', NULL, 'AWD', 'suv', 'skoda-octavia', '6.9 сек', '190 к.с.', NULL, 'Combined', 'order', 'petrol', '2.0 л', '6.9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-213-1.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-212.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-209.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-211.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-213-1.webp", "alt": "Skoda Octavia", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('148d0c5d-7579-456b-abbb-bc02d6b53830', 'Skoda Superb', 'Skoda', NULL, 'AWD', 'sedan', 'skoda-superb', '6.9 сек', '190 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2431.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-242.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-239.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2411.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2431.webp", "alt": "Skoda Superb", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('cb0ea0d7-f166-41b2-b84b-83f4af15289e', 'Skoda Kodiaq', 'Skoda', NULL, 'AWD', 'suv', 'skoda-kodiaq', '8.0 сек', '190 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-233.webp", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/2.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/1.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/4.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/3.png", "alt": "Skoda Kodiaq", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('9e00dd4a-db80-4226-8912-790c206e2f1b', 'BMW 340i xDrive', 'BMW', NULL, 'AWD', 'sedan', 'bmw-340i-xdrive', '4.4 сек', '374 к.с.', NULL, 'Leather', 'order', 'hybrid', '3.0 л', '8.6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-171.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-170.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-169.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-167.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-171.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('16dbcedb-3fe1-415e-8fb2-6af6d6ee614e', 'BMW 540', 'BMW', NULL, 'AWD', 'sedan', 'bmw-540', '5.2 сек', '333 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.1', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2231.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-222.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-221.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-219.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2231.webp", "alt": "BMW 540", "width": null, "height": null}]'::jsonb);
+INSERT INTO public.cars VALUES ('5b3973e6-3f4c-4734-93dc-dbb3a53ce894', 'BMW 740', 'BMW', NULL, 'AWD', 'suv', 'bmw-740', '5.8 сек', '299 к.с.', NULL, 'Leather', 'order', 'petrol', '3.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-1211.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-120-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-119-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-117-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-1211.webp", "alt": "BMW 740", "width": null, "height": null}]'::jsonb);
+
+-- car_pages
 INSERT INTO public.car_pages VALUES ('3cca3184-a311-4624-b1c2-845b068c08e7', 'ed05f534-f9db-4ff3-86d0-9fc52a600d28', 'Тачка кольору всесвіту🌌', '<p>VW Tiguan — універсальний SUV із німецьким характером.<br />
 Доступна топова версія:</p>
 <p>2.0 TSI — 250 к.с., 370 Нм, 0–100 км/год за 6,2 с<br />
@@ -742,11 +501,7 @@ INSERT INTO public.car_pages VALUES ('fedce460-b408-461e-bcd9-e14e1f06ca88', '5b
 <p>BMW 740 у підписці Drivovo — це розкіш, що рухається легко й впевнено</p>
 ', NULL, '[{"author": "Осбанов Ізмаіл", "rating": 5, "comment": "Для мене мрії — це щось на зразок мого бачення себе у майбутньому (візія). Це те, що надає сенс у важкі часи і допомагає знаходити мотивацію рухатися вперед. Це не просто “мріяти” в звичному розумінні, а ставити перед собою конкретні цілі й прагнути їх досягнення. Нещодавно отримав нагадування про це, коли Drivovo запропонували мені взяти тест-драйв. Мені написав Maksym Soloviov і запропонував вибрати будь-яке авто з автопарку. Звісно, я обрав те, про яке мрію. Сервіс Drivovo дозволяє вам доторкнутися до мрії вже зараз, а не чекати, поки прийде потрібний/влучний/доречний/на часі (і тут купа відмовок) момент. Вони дають відчути, що мрії — це не щось далеке, а цілком реальне, якщо правильно підійти до їх втілення.", "authorImage": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-07-28_19-56-07.jpg"}]', 'BMW 740i за підпискою — люксовий седан без зобовʼязань', 'BMW 740i — розкішний бізнес-седан із потужним двигуном і преміальним комфортом. Доступний за підпискою — сервіс, КАСКО та обслуговування в одному платежі.', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/BMW-740-2.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/BMW-740-3.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/BMW-740-4.webp", "alt": "BMW 740", "width": null, "height": null}]'::jsonb);
 
-
---
--- Data for Name: car_prices; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
+-- car_prices
 INSERT INTO public.car_prices VALUES ('180ca4a3-56d9-421f-860b-b4654d939147', 'ed05f534-f9db-4ff3-86d0-9fc52a600d28', '6274aca2-f334-4094-9e47-6c5a4e280be1', 160590.00, 'USD');
 INSERT INTO public.car_prices VALUES ('fe2fb161-6bcf-402f-8f42-7846c8fdea63', 'ed05f534-f9db-4ff3-86d0-9fc52a600d28', '058f12f1-3bf6-497f-8e1c-5361c54f8b85', 160590.00, 'USD');
 INSERT INTO public.car_prices VALUES ('ba703388-71fd-4599-8927-7854b24b692c', '59a8b950-1194-4a76-a12b-29890e001fe0', '6274aca2-f334-4094-9e47-6c5a4e280be1', 239530.00, 'USD');
@@ -805,415 +560,3 @@ INSERT INTO public.car_prices VALUES ('32b3f19f-1252-4a22-a4e7-6031d9d9cdb1', '1
 INSERT INTO public.car_prices VALUES ('be3a02f5-1995-4a8d-b415-a498318fd5f5', '16dbcedb-3fe1-415e-8fb2-6af6d6ee614e', '058f12f1-3bf6-497f-8e1c-5361c54f8b85', 291427.00, 'USD');
 INSERT INTO public.car_prices VALUES ('b94a0d11-b0a9-4581-b678-042e7672cd80', '5b3973e6-3f4c-4734-93dc-dbb3a53ce894', '6274aca2-f334-4094-9e47-6c5a4e280be1', 556500.00, 'USD');
 INSERT INTO public.car_prices VALUES ('ec0a40a5-b5d2-433a-9197-4a5fc1a83962', '5b3973e6-3f4c-4734-93dc-dbb3a53ce894', '058f12f1-3bf6-497f-8e1c-5361c54f8b85', 556500.00, 'USD');
-
-
---
--- Data for Name: cars; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-INSERT INTO public.cars VALUES ('ed05f534-f9db-4ff3-86d0-9fc52a600d28', 'VW Tiguan R-Line', 'VW', '<p>Та й за наповненням справжній космос!</p>
-<p>VW Tiguan R-Line створений вражати: потужний, зручний та максимально диджиталізований, цей позашляховик здобуде прихильність поціновувачів драйву та поправді прогресивного дизайну.</p>
-<p>Заціни Tiguan R-Line на тест-драйві від Drivovo!</p>
-<p>Drive IT easy!</p>
-', 'AWD', 'suv', 'vw-tiguan-rline', '6.2 сек', '220 к.с.', NULL, 'Combined', 'available', 'petrol', '2.0 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-28.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-22.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-21.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-23.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-28.webp", "alt": "VW Tiguan R-Line", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('59a8b950-1194-4a76-a12b-29890e001fe0', 'Audi Q5 S-Line', 'audi', '<p>Автосервіс про твої життєві плани та інтереси.</p>
-<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
-<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
-', 'AWD', 'suv', 'audi-q5-s-line-black', '6.1 сек', '249 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '10', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-12.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-14.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-13.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-12.webp", "alt": "Audi Q5 S-Line", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('4be2ac97-7b2c-4026-a4db-e8857ed6cfb3', 'AUDI Q7 S-Line', 'audi', '<p>Автосервіс про твої життєві плани та інтереси.</p>
-<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
-<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
-', 'AWD', 'suv', 'audi-q7-50-tdi', '6.9', '286 к.с.', NULL, 'Leather', 'order', 'diesel', '3.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-1-6.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55-11.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52-11.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.57-10.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-1-6.webp", "alt": "AUDI Q7 S-Line", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('d875c8a9-c080-4904-9a2a-171c1d8be473', 'Audi Q8 S-Line', 'audi', '<p>Найкомфортніший SUV від AUDI, що без вагань вмістить 5 осіб та купу валіз і це буде зручно!</p>
-<p>Більш детально про цього велетня дивись на відео, він вартий твоєї уваги!</p>
-<p>Запишись на тест-драйв Audi Q8 50 TDI quattro S line , оформлюй підписку та насолоджуйся його вишуканістю та комфортом!</p>
-<p>Drive IT easy!</p>
-', 'AWD', 'suv', 'audi-q8-50-tdi', '6.3 сек', '286 к.с.', NULL, 'Leather', 'available', 'diesel', '3.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-4-4.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55-14.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52-15.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.57-14.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.51.05-4-4.webp", "alt": "Audi Q8 S-Line", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('36b9355c-86e4-4e8f-98be-7d0a65d4d122', 'BMW X5 xDrive 30d', 'BMW', '<p>Автосервіс про твої життєві плани та інтереси.</p>
-<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
-<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
-', 'AWD', 'suv', 'bmw-x5-30d', '6.5 сек', '265 к.с.', NULL, 'Leather', 'available', 'diesel', '3.0 л.', '7.7', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-151-1.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-150.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-147.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-149.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-151-1.webp", "alt": "BMW X5 xDrive 30d", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('77fc1d11-001b-42a7-856c-e10a3881b8fa', 'Cupra Formentor VZ ', 'Cupra', '<p>Настав час це виправити, адже Formentor можна порівняти з ковтком свіжого повітря після довгого дня в офісі.</p>
-<p>Він потужний, керований, компактний та стильний, як і всі представники концерну Volkswagen Audi Group, але ефектно відрізняється від більшості з них.</p>
-<p>Drive IT easy!</p>
-', 'AWD', 'suv', 'cupra-formentor-vz', '4.9 сек', '310 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '13', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-27.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-2.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-1.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-3.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-27.webp", "alt": "Cupra Formentor VZ ", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('e908ecea-321b-4273-bf88-32e42bdc8e3e', 'Mercedes-Benz GLS-Class', 'Mercedes-Benz', '<p>Автосервіс про твої життєві плани та інтереси.</p>
-<p>Наші клієнти фокусуються на власному світі, а ми забезпечуємо їхній душевний спокій та задоволення від володіння авто. Користувачі нашого сервісу розуміють один одного, бо їхній час дорожчий за час, витрачений на ТО.</p>
-<p>Через рік користування ти звикнеш, але не перестанеш дивуватися, коли за тебе вирішують питання по страховим випадкам, шиномонтажу чи ТО, допомагать з розвитком бізнесу, пропонують надійні способи інвестування та багато іншого.</p>
-', 'AWD', 'suv', 'mercedes-gls-400d', '6.3 сек', '326 к.с.', NULL, 'Leather', 'order', 'diesel', '3.0 л', '7.6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-113.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.55.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.46.38-1-kopiya.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.56.52.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-113.webp", "alt": "Mercedes-Benz GLS-Class", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('0e4e5a87-7d15-4e36-92a9-8a39392d915a', 'Porsche Macan', 'Porsche', '<p>З кожною поїздкою по місту або по дорозі на відпочинок, ти будеш насолоджуватися почуттям абсолютної свободи. А глядачі на вулиці будуть лише заздрити твоєму бездоганному стилю та потужності.</p>
-<p>Нехай синій колір Miami Blue занурить тебе у світ розкоші та ексклюзивності, а підписка на авто Drivovo забезпечить безтурботну їзду, завжди насичену емоціями та драйвом.</p>
-<p>Drive IT easy!</p>
-', 'AWD', 'suv', 'porsche-macan', '6.4 сек', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '11', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-1131.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Gemini_Generated_Image_cu7ka7cu7ka7cu7k.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Gemini_Generated_Image_50xqau50xqau50xq1.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-15.46.38-1.webp", "alt": "Porsche Macan", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-1131.webp", "alt": "Porsche Macan", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('96df0494-350f-4d5f-af9e-68ca23b34891', 'Toyota RAV4 hybrid', 'Toyota', '<p>Його ставлять у приклад, проводжають поглядом та хочуть всі🤤</p>
-<p>Щоб стати до нього ближче, потрібен правильний контакт, і для тебе це — DRIVOVO.</p>
-<p>Розглянь цього красунчика ближче у нашому новому відеоогляді та скоріш бронюй тест-драйв📲</p>
-<p>Drive IT easy!</p>
-', 'AWD', 'suv', 'toyota-rav4-hybrid-style', '8.0 сек', '222 к.с.', NULL, 'Leather', 'available', 'hybrid', '2.5 л', '6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-5.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-7.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-4.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-6.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/photo_2025-10-13-5.webp", "alt": "Toyota RAV4 hybrid", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('546ba37f-46cb-44fe-b268-63eada8d9d24', 'VW T-Roc Style', 'VW', '<p>Наші клієнти замовляють його пачками, а твій сусід тихенько плаче в ночі над його фоткою.</p>
-<p>Що ж такого класного в VW T-Roc Style? Дивись у нашому відосі!🎥</p>
-<p>Drive IT easy!</p>
-', 'FWD', 'suv', 'vw-t-roc-style-white', '8.4 сек', '150 к.с.', NULL, 'Textile', 'available', 'petrol', '1.5 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-131.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-130.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-127.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-129.webp", "alt": "VW T-Roc Style", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/03/Frame-131.webp", "alt": "VW T-Roc Style", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('a6969073-5ada-4784-9901-fa5a3a090af7', 'Audi A6 S-line', 'audi', '<p class="p1"><span class="s1"><b>Audi A6</b></span> — це еталон стилю, комфорту та технологічності у сегменті бізнес-седанів. Вишуканий дизайн, потужні бензинові та дизельні двигуни, а також інноваційні системи допомоги водієві створюють винятковий досвід керування. Просторий салон і бездоганна шумоізоляція роблять кожну поїздку комфортною.</p>
-<p class="p1">Обирайте <span class="s1"><b>Audi A6 за підпискою</b></span> — керуйте авто преміум-класу без довгострокових зобов’язань. <span class="s1"><b>Підписка на авто</b></span> — це новий спосіб володіння, який дозволяє вам отримати максимум свободи, сервісу й емоцій без бюрократії.</p>
-', 'AWD', 'suv', 'audi-a6-45-tfsi', '6,0 с', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', NULL, '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-3-2.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-15.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-16.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-17.webp", "alt": "Audi A6 S-line", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-3-2.webp", "alt": "Audi A6 S-line", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('3b968137-a79e-4cda-b373-497b689da090', 'Audi A7 45 TFSI', 'audi', '<p class="p1">Його лінії — як постріл у серце. Його образ — це про стиль, статус і спокій упевненого руху 😎</p>
-<p class="p1">Щоб наблизитись до нього — потрібен лише один правильний крок, і це — DRIVOVO.</p>
-<p class="p1">Зазирни у відеоогляд цього красеня та бронюй тест-драйв уже зараз📲</p>
-<p class="p3">Drive IT easy!<b></b></p>
-', 'AWD', 'sedan', 'audi-a7-45-tfsi', '6.2 сек', '265 к.с.', NULL, 'Leather', 'available', 'petrol', '2.0 л', '6.8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-30.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-32.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-31.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-33.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-30.webp", "alt": "Audi A7 45 TFSI", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('56f71b72-5a4d-4e9f-b8ed-6e4504e3b7cd', 'Touareg R-line 3.0 TDI', 'VW', '<p class="p1">Він не просто їде — він демонструє характер.</p>
-<p class="p1">Volkswagen Touareg R-Line — для тих, хто звик брати своє впевнено💪</p>
-<p class="p1">Наблизитись до нього легко — просто обери DRIVOVO.</p>
-<p class="p1">Дивись відеоогляд і бронюй тест-драйв вже зараз📲</p>
-<p class="p3"><b>Drive IT easy!</b><b></b></p>
-', 'AWD', 'suv', 'vw-touareg-r-line', '6.1 сек', '286 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '8.1', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-18.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-17.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-16.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-19.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-18.webp", "alt": "Touareg R-line 3.0 TDI", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('bf08ea70-70fc-43dd-86af-3d3df2332e4a', 'Cupra Terramar ', 'Cupra', NULL, 'AWD', 'suv', 'cupra-terramar-vz', '5.5 сек', '265 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8.4', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-8.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-10.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-9.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-11.webp", "alt": "Cupra Terramar ", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-8.webp", "alt": "Cupra Terramar ", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('f8467957-2266-49ed-8de0-19f7a5f8b184', 'Toyota Prado', 'Toyota', NULL, 'AWD', 'suv', 'toyota-prado', '8.6 сек', '204 к.с.', NULL, 'Leather', 'available', 'diesel', '2.8 л', '9.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-13.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-18.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-19.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-20.webp", "alt": "Toyota Prado", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-13.webp", "alt": "Toyota Prado", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('2f4bbdbf-2786-44c6-8214-325c3907ddba', 'Porsche Cayenne', 'Porsche', NULL, 'AWD', 'suv', 'porsche-cayenne', '6.0 сек', '353 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.4', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-36.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.55-17.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.52-18.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.56.57-19.webp", "alt": "Porsche Cayenne", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-15.51.05-6-2.webp", "alt": "Porsche Cayenne", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('5732f653-05fd-438e-a32d-ed05deddfaa1', 'Porsche Panamera', 'Porsche', NULL, 'AWD', 'suv', 'porsche-panamera-pl', '5.3 сек', '353 к.с.', NULL, 'Leather', 'available', 'petrol', '2.9 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-35.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-39.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-38.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-40.webp", "alt": "Porsche Panamera", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/photo_2025-10-13-35.webp", "alt": "Porsche Panamera", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('e6c2b8d2-442b-4163-a69e-ee9ec6bb41c0', 'Mercedes GLC 300 4MATIC', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-glc-300-4matic', '6.2 сек', '258 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-161.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-160.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-157.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-159.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-161.webp", "alt": "Mercedes GLC 300 4MATIC", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('91e038c6-600e-468f-90e8-33cb4674e00f', 'Mercedes-Benz GLE', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-gle-350de-4matic', '6.8 сек', '320 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-121-1.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-120.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-117.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-119.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-121-1.webp", "alt": "Mercedes-Benz GLE", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('359746e7-0cd9-4f27-af31-4dec0f1564ac', 'Mercedes-Benz GLE 300 d 4MATIC Coupe', 'Mercedes-Benz', NULL, 'AWD', 'suv', 'mercedes-gle-300d-coupe', '6.8 сек', '269 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-141.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-140.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-137.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-139.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-141.webp", "alt": "Mercedes-Benz GLE 300 d 4MATIC Coupe", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('524ba971-5f04-4076-b290-b7b883de4b37', 'BMW X7', 'BMW', NULL, 'AWD', 'suv', 'bmw-x7', '5.8 сек', '381 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-191-1.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-190.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-187.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-189.webp", "alt": "BMW X7", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-191-1.webp", "alt": "BMW X7", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('7b376c86-ecea-416c-8d8f-209c8b28490d', 'Lexus RX', 'Lexus', NULL, 'AWD', 'suv', 'lexus-rx', '7.9  сек', '279 к.с.', NULL, 'Leather', 'order', 'petrol', '2.4 л', '10.5', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-181.webp", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-180.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-177.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-179.png", "alt": "Lexus RX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-181.webp", "alt": "Lexus RX", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('98728181-0862-48f0-9a47-36d86f2d4bad', 'Lexus LX', 'Lexus', NULL, 'AWD', 'suv', 'lexus-lx', '7.7 сек', '299 к.с.', NULL, 'Leather', 'order', 'diesel', '3.4 л', '10', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-202.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-201.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-198.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-200.webp", "alt": "Lexus LX", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-202.webp", "alt": "Lexus LX", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('872d66c6-5bcc-480c-b294-5081a7e97150', 'Skoda Octavia', 'Skoda', NULL, 'AWD', 'suv', 'skoda-octavia', '6.9 сек', '190 к.с.', NULL, 'Combined', 'order', 'petrol', '2.0 л', '6.9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-213-1.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-212.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-209.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-211.webp", "alt": "Skoda Octavia", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-213-1.webp", "alt": "Skoda Octavia", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('148d0c5d-7579-456b-abbb-bc02d6b53830', 'Skoda Superb', 'Skoda', NULL, 'AWD', 'sedan', 'skoda-superb', '6.9 сек', '190 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '9', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2431.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-242.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-239.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2411.webp", "alt": "Skoda Superb", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2431.webp", "alt": "Skoda Superb", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('cb0ea0d7-f166-41b2-b84b-83f4af15289e', 'Skoda Kodiaq', 'Skoda', NULL, 'AWD', 'suv', 'skoda-kodiaq', '8.0 сек', '190 к.с.', NULL, 'Leather', 'order', 'petrol', '2.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-233.webp", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/2.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/1.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/4.png", "alt": "Skoda Kodiaq", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/3.png", "alt": "Skoda Kodiaq", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('9e00dd4a-db80-4226-8912-790c206e2f1b', 'BMW 340i xDrive', 'BMW', NULL, 'AWD', 'sedan', 'bmw-340i-xdrive', '4.4 сек', '374 к.с.', NULL, 'Leather', 'order', 'hybrid', '3.0 л', '8.6', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-171.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-170.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-169.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-167.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-171.webp", "alt": "BMW 340i xDrive", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('16dbcedb-3fe1-415e-8fb2-6af6d6ee614e', 'BMW 540', 'BMW', NULL, 'AWD', 'sedan', 'bmw-540', '5.2 сек', '333 к.с.', NULL, 'Leather', 'available', 'petrol', '3.0 л', '10.1', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2231.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-222.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-221.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-219.webp", "alt": "BMW 540", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-2231.webp", "alt": "BMW 540", "width": null, "height": null}]'::jsonb);
-INSERT INTO public.cars VALUES ('5b3973e6-3f4c-4734-93dc-dbb3a53ce894', 'BMW 740', 'BMW', NULL, 'AWD', 'suv', 'bmw-740', '5.8 сек', '299 к.с.', NULL, 'Leather', 'order', 'petrol', '3.0 л', '8', '[{"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-1211.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-120-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-119-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-117-1.webp", "alt": "BMW 740", "width": null, "height": null}, {"url": "https://drivovo.eu/wp-content/uploads/2025/07/Frame-1211.webp", "alt": "BMW 740", "width": null, "height": null}]'::jsonb);
-
-
---
--- Data for Name: countries; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-INSERT INTO public.countries VALUES ('6274aca2-f334-4094-9e47-6c5a4e280be1', 'Ukraine', 'UA', 'UKR', '+380', 'UAH');
-INSERT INTO public.countries VALUES ('058f12f1-3bf6-497f-8e1c-5361c54f8b85', 'Poland', 'PL', 'POL', '+48', 'PLN');
-
-
---
--- Data for Name: credits; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-
---
--- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-
---
--- Data for Name: subscriptions; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-INSERT INTO public.subscriptions VALUES ('f12b0d91-ce07-47dc-b243-c247fde3e652', 'leasing', 'Leasing');
-INSERT INTO public.subscriptions VALUES ('4361a659-76b0-458f-b2d2-81cfda28c8fc', 'subscription', 'Subscription');
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: drivovo
---
-
-
---
--- Name: car_pages car_pages_car_id_key; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_pages
-    ADD CONSTRAINT car_pages_car_id_key UNIQUE (car_id);
-
-
---
--- Name: car_pages car_pages_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_pages
-    ADD CONSTRAINT car_pages_pkey PRIMARY KEY (id);
-
-
---
--- Name: car_prices car_prices_car_id_country_id_key; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_prices
-    ADD CONSTRAINT car_prices_car_id_country_id_key UNIQUE (car_id, country_id);
-
-
---
--- Name: car_prices car_prices_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_prices
-    ADD CONSTRAINT car_prices_pkey PRIMARY KEY (id);
-
-
---
--- Name: cars cars_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.cars
-    ADD CONSTRAINT cars_pkey PRIMARY KEY (id);
-
-
---
--- Name: countries countries_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.countries
-    ADD CONSTRAINT countries_pkey PRIMARY KEY (id);
-
-
---
--- Name: credits credits_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.credits
-    ADD CONSTRAINT credits_pkey PRIMARY KEY (id);
-
-
---
--- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
-
-
---
--- Name: orders orders_tariff_id_car_id_country_id_key; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_tariff_id_car_id_country_id_key UNIQUE (tariff_id, car_id, country_id);
-
-
---
--- Name: subscriptions subscriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.subscriptions
-    ADD CONSTRAINT subscriptions_pkey PRIMARY KEY (id);
-
-
---
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-
---
--- Name: idx_car_pages_car_id; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE UNIQUE INDEX idx_car_pages_car_id ON public.car_pages USING btree (car_id);
-
-
---
--- Name: idx_car_pages_reviews_gin; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_car_pages_reviews_gin ON public.car_pages USING gin (reviews);
-
-
---
--- Name: idx_car_prices_car_country; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE UNIQUE INDEX idx_car_prices_car_country ON public.car_prices USING btree (car_id, country_id);
-
-
---
--- Name: idx_cars_brand; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_cars_brand ON public.cars USING btree (brand);
-
-
---
--- Name: idx_cars_status; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_cars_status ON public.cars USING btree (status);
-
-
---
--- Name: idx_cars_type; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_cars_type ON public.cars USING btree (type);
-
-
---
--- Name: idx_countries_iso2; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE UNIQUE INDEX idx_countries_iso2 ON public.countries USING btree (iso2);
-
-
---
--- Name: idx_countries_iso3; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE UNIQUE INDEX idx_countries_iso3 ON public.countries USING btree (iso3);
-
-
---
--- Name: idx_credits_car_id; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_credits_car_id ON public.credits USING btree (car_id);
-
-
---
--- Name: idx_credits_created_at; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_credits_created_at ON public.credits USING btree (created_at);
-
-
---
--- Name: idx_credits_status; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_credits_status ON public.credits USING btree (status);
-
-
---
--- Name: idx_credits_user_id; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_credits_user_id ON public.credits USING btree (user_id);
-
-
---
--- Name: idx_orders_car_country; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_orders_car_country ON public.orders USING btree (car_id, country_id);
-
-
---
--- Name: idx_orders_country_id; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_orders_country_id ON public.orders USING btree (country_id);
-
-
---
--- Name: idx_orders_tariff_id; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_orders_tariff_id ON public.orders USING btree (tariff_id);
-
-
---
--- Name: idx_users_email; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE UNIQUE INDEX idx_users_email ON public.users USING btree (email);
-
-
---
--- Name: idx_users_phone; Type: INDEX; Schema: public; Owner: drivovo
---
-
-CREATE INDEX idx_users_phone ON public.users USING btree (phone);
-
-
---
--- Name: car_pages car_pages_car_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_pages
-    ADD CONSTRAINT car_pages_car_id_fkey FOREIGN KEY (car_id) REFERENCES public.cars(id) ON DELETE CASCADE;
-
-
---
--- Name: car_prices car_prices_car_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_prices
-    ADD CONSTRAINT car_prices_car_id_fkey FOREIGN KEY (car_id) REFERENCES public.cars(id) ON DELETE CASCADE;
-
-
---
--- Name: car_prices car_prices_country_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.car_prices
-    ADD CONSTRAINT car_prices_country_id_fkey FOREIGN KEY (country_id) REFERENCES public.countries(id) ON DELETE CASCADE;
-
-
---
--- Name: credits credits_car_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.credits
-    ADD CONSTRAINT credits_car_id_fkey FOREIGN KEY (car_id) REFERENCES public.cars(id) ON DELETE RESTRICT;
-
-
---
--- Name: credits credits_country_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.credits
-    ADD CONSTRAINT credits_country_id_fkey FOREIGN KEY (country_id) REFERENCES public.countries(id) ON DELETE RESTRICT;
-
-
---
--- Name: credits credits_tariff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.credits
-    ADD CONSTRAINT credits_tariff_id_fkey FOREIGN KEY (tariff_id) REFERENCES public.subscriptions(id) ON DELETE RESTRICT;
-
-
---
--- Name: credits credits_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.credits
-    ADD CONSTRAINT credits_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT;
-
-
---
--- Name: orders orders_car_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_car_id_fkey FOREIGN KEY (car_id) REFERENCES public.cars(id) ON DELETE CASCADE;
-
-
---
--- Name: orders orders_country_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_country_id_fkey FOREIGN KEY (country_id) REFERENCES public.countries(id) ON DELETE CASCADE;
-
-
---
--- Name: orders orders_tariff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: drivovo
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_tariff_id_fkey FOREIGN KEY (tariff_id) REFERENCES public.subscriptions(id) ON DELETE CASCADE;
-
-
---
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: drivovo
---
-
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-
-
---
--- PostgreSQL database dump complete
---
-
-\unrestrict lap19b0riJYmC4yLOH2L2vInzMcNyU6msm59dhl0CJT5vb74h1SDbDJZbzFBhpz
-

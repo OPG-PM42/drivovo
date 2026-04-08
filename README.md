@@ -11,43 +11,80 @@ Nx-монорепозиторий на базе Next.js 16 и React 19 с арх
 - **Стили:** Tailwind CSS 3.4
 - **Линтинг:** ESLint 9 + Prettier
 
-## Локальная установка и настройка
+## Запуск проекта
 
-1. Версия Node: >=18.10.0
-
-2. Установка зависимостей:
+### Первый запуск
 
 ```shell
 npm ci
+cp .env.example .env          # при необходимости отредактируйте переменные
+docker compose up db -d        # поднять PostgreSQL
+npm run migrate                # создать схему БД
+docker compose exec -T db psql -U drivovo -d drivovo < apps/backend/src/utils/seed/seed.sql  # загрузить seed-данные
 ```
 
-3. Запуск dev-сервера на <http://localhost:3000/> :
+### Последующие запуски
 
 ```shell
-npm run dev
+docker compose up db -d        # поднять PostgreSQL (если остановлен)
+npm run migrate                # применить новые миграции (если есть)
 ```
 
-4. Сборка проекта в production режиме:
+### Запуск всех сервисов через Docker
 
 ```shell
-npm run build
+docker compose up -d           # backend + web + admin + db
 ```
 
-5. Запуск production сервера:
+Или по отдельности:
 
 ```shell
-npm run start
+docker compose up db -d
+npm run dev                    # web на http://localhost:3000
+npm run dev:backend            # backend на http://localhost:5000
+npm run dev:admin              # admin на http://localhost:4200
 ```
 
-6. Линтинг:
+### Миграции БД
+
+```shell
+npm run migrate                # применить все pending-миграции
+npm run migrate:up             # одна миграция вверх
+npm run migrate:down           # одна миграция вниз (откат)
+npm run migrate:status         # статус всех миграций
+npm run migrate:create -- name # создать новый файл миграции
+```
+
+Миграции находятся в `apps/backend/src/infrastructure/database/migrations/`.
+
+### Seed-данные
+
+Seed-данные загружаются вручную и нужны только при первом запуске или после полного сброса БД:
+
+```shell
+docker compose exec -T db psql -U drivovo -d drivovo < apps/backend/src/utils/seed/seed.sql
+```
+
+### Полный сброс БД
+
+```shell
+docker compose down -v         # удалить контейнер и volume
+docker compose up db -d
+npm run migrate
+docker compose exec -T db psql -U drivovo -d drivovo < apps/backend/src/utils/seed/seed.sql
+```
+
+### Сборка и запуск
+
+```shell
+npm run build                  # сборка production
+npm run start                  # запуск production сервера
+```
+
+### Линтинг и форматирование
 
 ```shell
 npm run lint
-```
-
-7. Форматирование кода:
-
-```shell
 npm run format
 npm run format:check
 ```

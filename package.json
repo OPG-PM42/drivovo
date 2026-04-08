@@ -2,6 +2,7 @@
   "name": "drivovo",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "nx dev web",
     "dev:admin": "nx serve admin",
@@ -13,7 +14,12 @@
     "start:admin": "nx serve admin",
     "lint": "eslint apps/web apps/admin",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "migrate": "tsx apps/backend/scripts/migrate.ts latest",
+    "migrate:up": "tsx apps/backend/scripts/migrate.ts up",
+    "migrate:down": "tsx apps/backend/scripts/migrate.ts down",
+    "migrate:status": "tsx apps/backend/scripts/migrate.ts status",
+    "migrate:create": "tsx apps/backend/scripts/migrate.ts create"
   },
   "dependencies": {
     "@angular/common": "~21.1.0",
@@ -74,6 +80,7 @@
     "tailwindcss": "^3.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.55.0"
   }

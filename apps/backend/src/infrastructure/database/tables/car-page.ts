@@ -1,17 +1,11 @@
-import type { ColumnType, Generated, JSONColumnType, Insertable, Updateable, OrderByModifiers } from 'kysely';
+import type { ColumnType, Generated, JSONColumnType, Insertable, Selectable, Updateable } from 'kysely';
 import type { CarPageEntity } from '@drivovo/domain';
-import db from '../index';
 import { createImage, createImageJson } from './image';
 import type { ImageJson } from './image';
 import { createReview, createReviewJson } from './review';
 import type { ReviewJson } from './review';
 import { createCarEntity } from './car';
-import type { SearchParams } from '../../../repositories/repository';
-
-const SORT_FIELD_MAP: Record<string, string> = {
-  title: 'car_pages.title',
-  rating: 'car_pages.rating',
-};
+import type { CarStatus, CarType, DriveType, FuelType } from './car';
 
 export interface CarPagesTable {
   id: Generated<string>;
@@ -25,7 +19,37 @@ export interface CarPagesTable {
   banners: JSONColumnType<ImageJson[]>;
 }
 
-type PageRow = Awaited<ReturnType<ReturnType<typeof createCarPageQuery>['executeTakeFirstOrThrow']>>;
+export interface CarPageEntityView {
+  page_id: string;
+  page_title: string;
+  page_description: string | null;
+  rating: number | null;
+  reviews: ReviewJson[];
+  seo_title: string | null;
+  seo_description: string | null;
+  banners: ImageJson[];
+  car_id: string;
+  car_name: string;
+  brand: string;
+  car_description: string | null;
+  drive_type: DriveType;
+  car_type: CarType;
+  car_url: string | null;
+  acceleration: string | null;
+  power: string | null;
+  color: string | null;
+  interior_trim: string | null;
+  status: CarStatus;
+  engine_type: FuelType;
+  engine_capacity: string | null;
+  engine_fuel_cons: string | null;
+  car_images: ImageJson[];
+  price_value: number | null;
+  price_currency: string | null;
+  price_country_id: string | null;
+}
+
+type PageRow = Selectable<CarPageEntityView>;
 
 
 export function createCarPageTable(entity: CarPageEntity): Insertable<CarPagesTable> {
@@ -39,50 +63,6 @@ export function createCarPageTable(entity: CarPageEntity): Insertable<CarPagesTa
     seo_description: entity.seo.description || null,
     banners: JSON.stringify(entity.banners.map(createImageJson)),
   };
-}
-
-export function createCarPageQuery(params?: SearchParams) {
-  let query = db
-    .selectFrom('car_pages')
-    .innerJoin('cars', 'cars.id', 'car_pages.car_id')
-    .leftJoin('car_prices', 'car_prices.car_id', 'cars.id')
-    .select([
-      'car_pages.id as page_id',
-      'car_pages.title as page_title',
-      'car_pages.description as page_description',
-      'car_pages.rating',
-      'car_pages.reviews',
-      'car_pages.seo_title',
-      'car_pages.seo_description',
-      'car_pages.banners',
-      'cars.id as car_id',
-      'cars.name as car_name',
-      'cars.brand',
-      'cars.description as car_description',
-      'cars.drive_type',
-      'cars.type as car_type',
-      'cars.url as car_url',
-      'cars.acceleration',
-      'cars.power',
-      'cars.color',
-      'cars.interior_trim',
-      'cars.status',
-      'cars.engine_type',
-      'cars.engine_capacity',
-      'cars.engine_fuel_cons',
-      'cars.images as car_images',
-      'car_prices.value as price_value',
-      'car_prices.currency as price_currency',
-      'car_prices.country_id as price_country_id',
-    ]);
-
-  if (params?.sortField && SORT_FIELD_MAP[params.sortField]) {
-    query = query.orderBy(SORT_FIELD_MAP[params.sortField] as any, params.sortOrder?.toLowerCase() as OrderByModifiers);
-  }
-  if (params?.limit) query = query.limit(params.limit);
-  if (params?.offset) query = query.offset(params.offset);
-
-  return query;
 }
 
 export function createCarPageEntity(row: PageRow): CarPageEntity {
@@ -129,3 +109,4 @@ export function createCarPageUpdates(entity: Partial<CarPageEntity>): Updateable
   }
   return result;
 }
+

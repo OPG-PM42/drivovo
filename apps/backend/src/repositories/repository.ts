@@ -1,8 +1,8 @@
-export interface SearchParams {
+export interface SearchParams<T extends string = string> {
   limit?: number;
   offset?: number;
-  sortField?: string;
-  sortOrder?: 'ASC' | 'DESC';
+  sortField?: T;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface Repository<E, P extends SearchParams = SearchParams> {

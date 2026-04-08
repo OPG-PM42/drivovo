@@ -1,7 +1,7 @@
 import type { Generated } from 'kysely';
 import { Kysely, PostgresDialect } from 'kysely';
 import pg from 'pg';
-import type { CarPagesTable } from './tables/car-page';
+import type { CarPagesTable, CarPageEntityView } from './tables/car-page';
 import type { CarsTable } from './tables/car';
 import type { CarPricesTable } from './tables/price';
 import type { CountriesTable } from './tables/country';
@@ -30,6 +30,7 @@ export interface Database {
   credits: CreditsTable;
   orders: OrdersTable;
   subscriptions: SubscriptionsTable;
+  car_page_entity: CarPageEntityView;
 }
 
 pg.types.setTypeParser(1700, parseFloat);
