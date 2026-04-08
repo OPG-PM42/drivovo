@@ -1,9 +1,7 @@
-import type { ColumnType, Generated, JSONColumnType, Selectable, Insertable, Updateable, OrderByModifiers } from 'kysely';
+import type { ColumnType, Generated, JSONColumnType, Selectable, Insertable, Updateable } from 'kysely';
 import type { CarEntity, Price } from '@drivovo/domain';
-import db from '../index';
 import { createImage, createImageJson } from './image';
 import type { ImageJson } from './image';
-import type { SearchParams } from '../../../repositories/repository';
 
 export type FuelType = 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'other';
 export type CarStatus = 'available' | 'order';
@@ -72,26 +70,6 @@ export function createCarTable(entity: CarEntity): Insertable<CarsTable> {
     engine_fuel_cons: entity.engine.fuel_consumption || null,
     images: JSON.stringify(entity.images.map(createImageJson)),
   };
-}
-
-const SORT_FIELD_MAP: Record<string, string> = {
-  name: 'cars.name',
-  brand: 'cars.brand',
-  status: 'cars.status',
-};
-
-export function createCarQuery(params?: SearchParams) {
-  let query = db
-    .selectFrom('cars')
-    .selectAll();
-
-  if (params?.sortField && SORT_FIELD_MAP[params.sortField]) {
-    query = query.orderBy(SORT_FIELD_MAP[params.sortField] as any, params.sortOrder?.toLowerCase() as OrderByModifiers);
-  }
-  if (params?.limit) query = query.limit(params.limit);
-  if (params?.offset) query = query.offset(params.offset);
-
-  return query;
 }
 
 export function createCarUpdates(entity: Partial<CarEntity>): Updateable<CarsTable> {

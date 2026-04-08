@@ -3,18 +3,32 @@ import db from "../infrastructure/database";
 import {
   createCarTable,
   createCarUpdates,
-  createCarQuery,
   createCarEntity,
 } from "../infrastructure/database/tables";
 import type { Repository, SearchParams } from "./repository";
 import { RepositoryError } from "../infrastructure/database/errors";
 
+const SORT_FIELD_MAP = {
+  name: 'name',
+  brand: 'brand',
+  status: 'status',
+} as const;
+
 interface CarRepository extends Repository<CarEntity> {}
 
 export default {
-  async find(params: SearchParams): Promise<CarEntity[]> {
+  async find(params: SearchParams<'name' | 'brand' | 'status'>): Promise<CarEntity[]> {
     try {
-      const rows = await createCarQuery(params).execute();
+      const rows = await db
+        .selectFrom('cars')
+        .selectAll()
+        .$if(Boolean(params?.sortField && SORT_FIELD_MAP[params.sortField!]), (query) =>
+          query.orderBy(SORT_FIELD_MAP[params.sortField!], params.sortOrder),
+        )
+        .$if(Boolean(params?.limit), (query) => query.limit(params.limit!))
+        .$if(Boolean(params?.offset), (query) => query.offset(params.offset!))
+        .execute();
+
       return rows.map((row) => createCarEntity(row));
     } catch (error) {
       throw RepositoryError.create(error);
@@ -23,8 +37,10 @@ export default {
 
   async findOne(id: string): Promise<CarEntity> {
     try {
-      const row = await createCarQuery()
-        .where("cars.id", "=", id)
+      const row = await db
+        .selectFrom('cars')
+        .selectAll()
+        .where('id', '=', id)
         .executeTakeFirstOrThrow(
           () => new Error(`Car with id ${id} not found`)
         );
