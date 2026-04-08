@@ -14,10 +14,11 @@ const SORT_FIELD_MAP = {
   rating: 'rating',
 } as const;
 
-interface PageRepository extends Repository<CarPageEntity> {}
+type PageSearchParams = SearchParams<'title' | 'rating'>;
+interface PageRepository extends Repository<CarPageEntity, PageSearchParams> {}
 
 export default {
-  async find(params: SearchParams<'title' | 'rating'>): Promise<CarPageEntity[]> {
+  async find(params: PageSearchParams): Promise<CarPageEntity[]> {
     try {
       const rows = await db
         .selectFrom('car_page_entity')
