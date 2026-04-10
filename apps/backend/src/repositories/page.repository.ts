@@ -6,8 +6,7 @@ import {
   createCarPageUpdates,
   createCarPageEntity,
 } from "../infrastructure/database/tables";
-import type { Repository, SearchParams } from "./repository";
-import { DATABASE_ERRORS, RepositoryError } from "../infrastructure/database/errors";
+import { type Repository, type SearchParams, RepositoryError } from "./repository";
 
 const SORT_FIELD_MAP = {
   title: 'page_title',
@@ -15,10 +14,10 @@ const SORT_FIELD_MAP = {
 } as const;
 
 type PageSearchParams = SearchParams<'title' | 'rating'>;
-interface PageRepository extends Repository<CarPageEntity, PageSearchParams> {}
+export interface PageRepository extends Repository<CarPageEntity, PageSearchParams> {}
 
 export default {
-  async find(params: PageSearchParams): Promise<CarPageEntity[]> {
+  async find(params: PageSearchParams = {}): Promise<CarPageEntity[]> {
     try {
       const rows = await db
         .selectFrom('car_page_entity')
@@ -32,67 +31,68 @@ export default {
 
       return rows.map(createCarPageEntity);
     } catch (error) {
-      throw RepositoryError.create(error);
+      throw RepositoryError.from(error);
     }
   },
 
-  async findOne(id: string): Promise<CarPageEntity> {
+  async findOne(id: string): Promise<CarPageEntity | null> {
     try {
       const row = await db
         .selectFrom('car_page_entity')
         .selectAll()
         .where('page_id', '=', id)
-        .executeTakeFirstOrThrow(() => 
-          new RepositoryError(
-            DATABASE_ERRORS.NOT_FOUND_ERROR,
-            `CarPage with id ${id} not found`
-          )
-        );
+        .executeTakeFirst();
 
-      return createCarPageEntity(row);
+      return row ? createCarPageEntity(row) : null;
     } catch (error) {
-      throw RepositoryError.create(error);
+      throw RepositoryError.from(error);
     }
   },
 
-  async insert(entity: CarPageEntity): Promise<string> {
+  async insert(entity: CarPageEntity): Promise<string | null> {
     try {
       const result = await db
         .insertInto('car_pages')
         .values(createCarPageTable(entity))
         .returning('id')
-        .executeTakeFirstOrThrow();
+        .executeTakeFirst();
 
-      return result.id;
+      return result?.id ?? null;
     } catch (error) {
-      throw RepositoryError.create(error);
+      throw RepositoryError.from(error);
     }
   },
 
-  async update(entity: Partial<CarPageEntity> & { id: string }): Promise<void> {
+  async update(entity: Partial<CarPageEntity> & { id: string }): Promise<string | null> {
     try {
       const pageUpdates = createCarPageUpdates(entity);
 
-      if (Object.keys(pageUpdates).length > 0) {
-        await db
-          .updateTable('car_pages')
-          .set(pageUpdates)
-          .where('id', '=', entity.id)
-          .execute();
-      }
+      if (Object.keys(pageUpdates).length === 0) return entity.id;
+
+      const result = await db
+        .updateTable('car_pages')
+        .set(pageUpdates)
+        .where('id', '=', entity.id)
+        .returning('id')
+        .executeTakeFirst();
+
+      return result?.id ?? null;
     } catch (error) {
-      throw RepositoryError.create(error);
+      throw RepositoryError.from(error);
     }
   },
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<string | null> {
     try {
-      await db
+      const result = await db
         .deleteFrom('car_pages')
         .where('id', '=', id)
-        .execute();
+        .returning('id')
+        .executeTakeFirst();
+
+      return result?.id ?? null;
     } catch (error) {
-      throw RepositoryError.create(error);
+      throw RepositoryError.from(error);
     }
   },
 } satisfies PageRepository;
