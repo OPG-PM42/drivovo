@@ -8,5 +8,5 @@ export interface Repositories {
 
 export default {
   cars: carRepository,
-  users: pageRepository,
+  pages: pageRepository,
 };

@@ -1,5 +1,6 @@
-import { createCarService } from './car';
+import repositories from '../../repositories';
+import createCarService from './car';
 
 export default {
-  cars: createCarService({}),
+  cars: createCarService({ repositories }),
 };
