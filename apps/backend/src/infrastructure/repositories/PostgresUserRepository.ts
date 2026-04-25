@@ -1,9 +1,9 @@
 import type { UserEntity, UserSearchParams, UserRepository } from '@drivovo/domain';
-import type { PgSelectBuilder } from '@metarhia/sql';
 import type { Pool } from '../pg/mock-pg';
-import { PostgresRepository } from './base.repository';
+import { PostgresRepository, type FieldMap } from './base.repository';
 
 type SystemFields = 'id' | 'createdAt' | 'updatedAt';
+type UserFields = Omit<UserEntity, SystemFields>;
 
 interface UserRow {
   id: string;
@@ -19,7 +19,7 @@ interface UserRow {
   updated_at: string;
 }
 
-const USER_COLUMNS = [
+const USER_COLUMNS: string[] = [
   'id',
   'name',
   'email',
@@ -43,18 +43,54 @@ const SORT_FIELD_MAP: Record<string, string> = {
   updatedAt: 'updated_at',
 };
 
+const SEARCH_FIELD_MAP: FieldMap<UserSearchParams> = {
+  drivingExperience: 'driving_experience',
+  cameFrom: 'came_from',
+  availabilityDay: 'availability_day',
+  availabilityTime: 'availability_time',
+};
+
+/**
+ * Maps flat (non-nested, non-transformed) entity fields to DB columns.
+ * The nested `availability` object is split across two columns and is
+ * mapped via `AVAILABILITY_FIELD_MAP`.
+ */
+const FLAT_FIELD_MAP: FieldMap<UserFields> = {
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  drivingExperience: 'driving_experience',
+  cameFrom: 'came_from',
+  drinks: 'drinks',
+};
+
+const AVAILABILITY_FIELD_MAP: FieldMap<UserEntity['availability']> = {
+  day: 'availability_day',
+  time: 'availability_time',
+};
+
 export class PostgresUserRepository
   extends PostgresRepository<UserEntity, UserRow, UserSearchParams>
   implements UserRepository
 {
-  protected readonly table = 'users';
-  protected readonly columns = USER_COLUMNS;
-  protected readonly sortFieldMap = SORT_FIELD_MAP;
-  protected readonly defaultSortColumn = 'created_at';
-  protected override readonly hasTimestamps = true;
+  protected readonly table: string = 'users';
+  protected readonly columns: string[] = USER_COLUMNS;
+  protected readonly sortFieldMap: Record<string, string> = SORT_FIELD_MAP;
+  protected readonly defaultSortColumn: string = 'created_at';
+  protected override readonly searchFieldMap: FieldMap<UserSearchParams> =
+    SEARCH_FIELD_MAP;
+  protected override readonly hasTimestamps: boolean = true;
 
   constructor(pool: Pool) {
     super(pool);
+  }
+
+  public async findByEmail(email: string): Promise<UserEntity | null> {
+    return this.findBy('email', email);
+  }
+
+  public async findByPhone(phone: string): Promise<UserEntity | null> {
+    return this.findBy('phone', phone);
   }
 
   protected rowToEntity(row: UserRow): UserEntity {
@@ -75,62 +111,24 @@ export class PostgresUserRepository
     };
   }
 
-  protected entityToRow(
-    data: Omit<UserEntity, SystemFields>,
-  ): Record<string, unknown> {
+  protected entityToRow(data: UserFields): Record<string, unknown> {
     return {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      driving_experience: data.drivingExperience,
-      came_from: data.cameFrom,
-      availability_day: data.availability.day,
-      availability_time: data.availability.time,
+      ...this.mapDefinedFields(data, FLAT_FIELD_MAP),
+      ...this.mapDefinedFields(data.availability, AVAILABILITY_FIELD_MAP),
       drinks: data.drinks ?? null,
     };
   }
 
   protected partialEntityToRow(
-    data: Partial<Omit<UserEntity, SystemFields>>,
+    data: Partial<UserFields>,
   ): Record<string, unknown> {
-    const row: Record<string, unknown> = {};
-    if (data.name !== undefined) row['name'] = data.name;
-    if (data.email !== undefined) row['email'] = data.email;
-    if (data.phone !== undefined) row['phone'] = data.phone;
-    if (data.drivingExperience !== undefined)
-      row['driving_experience'] = data.drivingExperience;
-    if (data.cameFrom !== undefined) row['came_from'] = data.cameFrom;
+    const row = this.mapDefinedFields(data, FLAT_FIELD_MAP);
     if (data.availability !== undefined) {
-      row['availability_day'] = data.availability.day;
-      row['availability_time'] = data.availability.time;
+      Object.assign(
+        row,
+        this.mapDefinedFields(data.availability, AVAILABILITY_FIELD_MAP),
+      );
     }
-    if (data.drinks !== undefined) row['drinks'] = data.drinks;
     return row;
-  }
-
-  protected applySearchFilters(
-    query: PgSelectBuilder,
-    params: UserSearchParams,
-  ): void {
-    if (params.drivingExperience !== undefined) {
-      query.whereEq('driving_experience', params.drivingExperience);
-    }
-    if (params.cameFrom !== undefined) {
-      query.whereEq('came_from', params.cameFrom);
-    }
-    if (params.availabilityDay !== undefined) {
-      query.whereEq('availability_day', params.availabilityDay);
-    }
-    if (params.availabilityTime !== undefined) {
-      query.whereEq('availability_time', params.availabilityTime);
-    }
-  }
-
-  async findByEmail(email: string): Promise<UserEntity | null> {
-    return this.findBy('email', email);
-  }
-
-  async findByPhone(phone: string): Promise<UserEntity | null> {
-    return this.findBy('phone', phone);
   }
 }

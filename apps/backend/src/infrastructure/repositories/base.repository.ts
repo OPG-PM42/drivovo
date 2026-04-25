@@ -6,13 +6,19 @@ import type { SearchParams } from '@drivovo/domain';
 type SystemFields = 'id' | 'createdAt' | 'updatedAt';
 
 /**
+ * Maps a (camelCase) source field name to the (snake_case) DB column.
+ * Used both for equality search filters and partial UPDATE payloads.
+ */
+export type FieldMap<T> = Partial<Record<keyof T, string>>;
+
+/**
  * Abstract base PostgreSQL repository implementing generic CRUD
  * operations via @metarhia/sql query builder.
  *
  * Concrete repositories extend this class and provide:
  *   - table name, column list, sort-field whitelist
- *   - row↔entity mapping functions
- *   - entity-specific search filters
+ *   - row→entity mapping
+ *   - field maps for search filters and partial updates
  *
  * All SQL is built through the query builder — no manual string
  * concatenation or parameter indexing.
@@ -26,7 +32,17 @@ export abstract class PostgresRepository<
   Row,
   Params extends SearchParams = SearchParams,
 > {
-  constructor(protected readonly pool: Pool) {}
+  /**
+   * Maps search-param keys to DB columns for simple equality filters.
+   * The default `applySearchFilters` iterates this map and applies
+   * `whereEq` for every defined value. Subclasses override
+   * `applySearchFilters` only when they need non-equality conditions
+   * (LIKE, BETWEEN, joins, etc.) on top of the map.
+   */
+  protected readonly searchFieldMap: FieldMap<Params> = {};
+
+  /** Whether the table has created_at / updated_at columns. */
+  protected readonly hasTimestamps: boolean = false;
 
   /** Database table name. */
   protected abstract readonly table: string;
@@ -44,32 +60,9 @@ export abstract class PostgresRepository<
   /** Default ORDER BY column when no sortField is specified. */
   protected abstract readonly defaultSortColumn: string;
 
-  /** Whether the table has created_at / updated_at columns. */
-  protected readonly hasTimestamps: boolean = false;
+  constructor(protected readonly pool: Pool) {}
 
-  /** Convert a database row (snake_case) to a domain entity (camelCase). */
-  protected abstract rowToEntity(row: Row): Entity;
-
-  /** Convert full entity data to DB column→value pairs for INSERT. */
-  protected abstract entityToRow(
-    data: Omit<Entity, SystemFields>,
-  ): Record<string, unknown>;
-
-  /** Convert partial entity data to DB column→value pairs for UPDATE. */
-  protected abstract partialEntityToRow(
-    data: Partial<Omit<Entity, SystemFields>>,
-  ): Record<string, unknown>;
-
-  /**
-   * Apply entity-specific WHERE conditions to the SELECT builder.
-   * Called by `find()` before ORDER BY / LIMIT / OFFSET.
-   */
-  protected abstract applySearchFilters(
-    query: PgSelectBuilder,
-    params: Params,
-  ): void;
-
-  async findOne(id: string): Promise<Entity | null> {
+  public async findOne(id: string): Promise<Entity | null> {
     const query = pg()
       .select(...this.columns)
       .from(this.table)
@@ -82,7 +75,7 @@ export abstract class PostgresRepository<
     return rows[0] ? this.rowToEntity(rows[0]) : null;
   }
 
-  async find(params: Params): Promise<Entity[]> {
+  public async find(params: Params): Promise<Entity[]> {
     const query = pg()
       .select(...this.columns)
       .from(this.table);
@@ -103,7 +96,7 @@ export abstract class PostgresRepository<
     return rows.map((row) => this.rowToEntity(row));
   }
 
-  async insert(data: Omit<Entity, SystemFields>): Promise<string> {
+  public async insert(data: Omit<Entity, SystemFields>): Promise<string> {
     const values = this.entityToRow(data);
     const query = pgInsert()
       .table(this.table)
@@ -117,7 +110,7 @@ export abstract class PostgresRepository<
     return rows[0].id;
   }
 
-  async update(
+  public async update(
     id: string,
     data: Partial<Omit<Entity, SystemFields>>,
   ): Promise<void> {
@@ -131,9 +124,64 @@ export abstract class PostgresRepository<
     await this.pool.query(query.build(), query.buildParams());
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     const query = pgDelete().from(this.table).whereEq('id', id);
     await this.pool.query(query.build(), query.buildParams());
+  }
+
+  /** Convert a database row (snake_case) to a domain entity (camelCase). */
+  protected abstract rowToEntity(row: Row): Entity;
+
+  /** Convert full entity data to DB column→value pairs for INSERT. */
+  protected abstract entityToRow(
+    data: Omit<Entity, SystemFields>,
+  ): Record<string, unknown>;
+
+  /** Convert partial entity data to DB column→value pairs for UPDATE. */
+  protected abstract partialEntityToRow(
+    data: Partial<Omit<Entity, SystemFields>>,
+  ): Record<string, unknown>;
+
+  /**
+   * Apply entity-specific WHERE conditions to the SELECT builder.
+   * Default implementation derives equality filters from
+   * `searchFieldMap`. Override only to add non-equality conditions.
+   */
+  protected applySearchFilters(query: PgSelectBuilder, params: Params): void {
+    this.applyEqualityFilters(query, params);
+  }
+
+  /** Apply `whereEq` for every key in `searchFieldMap` with a defined value. */
+  protected applyEqualityFilters(
+    query: PgSelectBuilder,
+    params: Params,
+  ): void {
+    for (const key of Object.keys(this.searchFieldMap) as Array<keyof Params>) {
+      const value = params[key];
+      if (value === undefined) continue;
+      const column = this.searchFieldMap[key];
+      if (column) query.whereEq(column, value as QueryValue);
+    }
+  }
+
+  /**
+   * Build a partial DB row from a source object using a field map.
+   * Skips undefined values — only defined fields are emitted, so the
+   * result is safe to pass to UPDATE without overwriting columns the
+   * caller did not intend to change.
+   */
+  protected mapDefinedFields<T>(
+    data: T,
+    fieldMap: FieldMap<T>,
+  ): Record<string, unknown> {
+    const row: Record<string, unknown> = {};
+    for (const key of Object.keys(fieldMap) as Array<keyof T>) {
+      const value = data[key];
+      if (value === undefined) continue;
+      const column = fieldMap[key];
+      if (column) row[column] = value;
+    }
+    return row;
   }
 
   /**
