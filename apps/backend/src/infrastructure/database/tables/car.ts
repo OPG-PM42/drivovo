@@ -24,7 +24,7 @@ export interface CarsTable {
   engine_type: FuelType;
   engine_capacity: string | null;
   engine_fuel_cons: string | null;
-  images: JSONColumnType<ImageJson[]>;
+  images?: JSONColumnType<ImageJson[]>;
 }
 
 export function createCarEntity(row: Selectable<CarsTable>, price?: Price): CarEntity {
@@ -68,7 +68,6 @@ export function createCarTable(entity: CarEntity): Insertable<CarsTable> {
     engine_type: entity.engine.type,
     engine_capacity: entity.engine.capacity || null,
     engine_fuel_cons: entity.engine.fuel_consumption || null,
-    images: JSON.stringify(entity.images.map(createImageJson)),
   };
 }
 
