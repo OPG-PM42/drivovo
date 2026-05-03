@@ -17,7 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "@drivovo/domain": ["libs/domain/src/index.ts"],
-      "@drivovo/fastify": ["libs/fastify/src/index.ts"]
+      "@drivovo/fastify": ["libs/fastify/src/index.ts"],
+      "@drivovo/utils": ["libs/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,10 +1,12 @@
 import type { Generated } from 'kysely';
 import { Kysely, PostgresDialect } from 'kysely';
 import pg from 'pg';
+import type { AdminsTable } from './tables/admin';
 import type { CarPagesTable, CarPageEntityView } from './tables/car-page';
 import type { CarsTable } from './tables/car';
 import type { CarPricesTable } from './tables/price';
 import type { CountriesTable } from './tables/country';
+import type { SessionsTable } from './tables/session';
 import type { UsersTable } from './tables/user';
 import type { CreditsTable } from './tables/credit';
 import type { SubscriptionsTable } from './tables/tariff';
@@ -22,10 +24,12 @@ export interface OrdersTable {
 }
 
 export interface Database {
+  admins: AdminsTable;
   car_pages: CarPagesTable;
   cars: CarsTable;
   car_prices: CarPricesTable;
   countries: CountriesTable;
+  sessions: SessionsTable;
   users: UsersTable;
   credits: CreditsTable;
   orders: OrdersTable;
