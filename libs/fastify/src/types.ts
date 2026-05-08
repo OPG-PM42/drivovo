@@ -1,33 +1,39 @@
-export interface CookieOptions {
-  domain?: string;
-  path?: string;
-  expires?: Date;
-  maxAge?: number;
-  httpOnly?: boolean;
-  secure?: boolean;
-  sameSite?: 'strict' | 'lax' | 'none';
+export type Access = 'public' | 'private';
+
+export interface Session {
+  token: string;
+  data?: unknown;
+  expiresAt: Date;
 }
 
-export interface Cookies {
-  get(name: string): string | undefined;
-  set(name: string, value: string, options?: CookieOptions): void;
-  delete(name: string, options?: Pick<CookieOptions, 'domain' | 'path'>): void;
+export interface AuthContext {
+  session: Session | null;
+  startSession(token: string, data?: unknown): Promise<Session>;
+  endSession(): Promise<void>;
 }
 
-export type HttpHeaders = Readonly<
-  Record<string, string | string[] | undefined>
->;
+export interface AuthProvider {
+  restoreSession(token: string): Promise<Session | null>;
+  startSession(token: string, data?: unknown): Promise<Session>;
+  endSession(token: string): Promise<void>;
+}
+
+export interface ServerConfig {
+  session?: {
+    cookieName?: string;
+    maxAgeSeconds?: number;
+  };
+}
 
 export interface HttpContext<
   Body = unknown,
   Query = unknown,
   Params = unknown,
 > {
-  headers: HttpHeaders;
-  query: Query;
   body: Body;
+  query: Query;
   params: Params;
-  cookies: Cookies;
+  auth: AuthContext;
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -49,6 +55,7 @@ export interface Endpoint<
 > {
   path: string;
   method: HttpMethod;
+  access?: Access;
   handler: EndpointHandler<B, Q, P, R>;
   errors?: Record<string, EndpointError>;
 }
