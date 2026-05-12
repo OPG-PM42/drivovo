@@ -153,7 +153,7 @@ import { UpdateCarUseCase } from '../../../application/use-cases/update-car.use-
   `,
   styles: `
     .page-header { margin-bottom: 16px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
     .full-width { grid-column: span 2; }
     .center { display: flex; justify-content: center; padding: 40px; }
     .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }

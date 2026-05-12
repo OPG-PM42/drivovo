@@ -42,7 +42,7 @@ import { MatIconModule } from '@angular/material/icon';
   `,
   styles: `
     .images-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .image-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .image-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
     .url-field { flex: 2; min-width: 200px; }
     .small-field { width: 80px; }
   `,

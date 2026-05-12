@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -14,6 +14,7 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
   imports: [
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
     MatToolbarModule,
     MatSidenavModule,
     MatListModule,
@@ -23,12 +24,13 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
   template: `
     <mat-sidenav-container class="sidenav-container">
       <mat-sidenav mode="side" opened class="sidenav">
+        <div class="sidenav-brand">Drivovo Admin</div>
         <mat-nav-list>
-          <a mat-list-item routerLink="/cars">
+          <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
             <mat-icon matListItemIcon>directions_car</mat-icon>
             <span matListItemTitle>Cars</span>
           </a>
-          <a mat-list-item routerLink="/tariffs">
+          <a mat-list-item routerLink="/tariffs" routerLinkActive="active-link">
             <mat-icon matListItemIcon>receipt_long</mat-icon>
             <span matListItemTitle>Tariffs</span>
           </a>
@@ -37,6 +39,7 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
 
       <mat-sidenav-content>
         <mat-toolbar color="primary">
+          <span class="toolbar-title">Drivovo Admin</span>
           <span class="spacer"></span>
           @if (authStore.admin(); as admin) {
             <span class="admin-name">{{ admin.name }}</span>
@@ -55,6 +58,16 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
   styles: `
     .sidenav-container { height: 100vh; }
     .sidenav { width: 220px; }
+    .sidenav-brand {
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #3f51b5;
+      border-bottom: 1px solid rgba(0,0,0,0.12);
+      margin-bottom: 8px;
+    }
+    .active-link { background: rgba(63, 81, 181, 0.12) !important; }
+    .toolbar-title { font-size: 18px; font-weight: 500; }
     .spacer { flex: 1 1 auto; }
     .admin-name { margin-right: 8px; font-size: 14px; }
     .content { padding: 24px; }

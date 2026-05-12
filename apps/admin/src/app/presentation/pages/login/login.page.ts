@@ -104,6 +104,7 @@ export class LoginPage {
     const { email, password } = this.form.getRawValue();
     this.signIn.execute(email!, password!).subscribe({
       next: (admin) => {
+        this.loading.set(false);
         this.authStore.setAdmin(admin);
         this.router.navigate(['/']);
       },
