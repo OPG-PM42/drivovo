@@ -1,12 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
+import { TuiSelect, TuiTextarea } from '@taiga-ui/kit';
+import { TuiForm } from '@taiga-ui/layout';
 import { carCreateSchema } from '@drivovo/domain';
 import { HasDirtyForm } from '../../guards/dirty-form.guard';
 import { ImageArrayEditorComponent, ImageFormControls } from '../../shared/forms/image-array-editor.component';
@@ -19,12 +16,13 @@ import { UpdateCarUseCase } from '../../../application/use-cases/update-car.use-
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
+    TuiButton,
+    ...TuiError,
+    TuiLoader,
+    TuiTextfield,
+    ...TuiSelect,
+    TuiTextarea,
+    TuiForm,
     ImageArrayEditorComponent,
   ],
   templateUrl: './car-form.page.html',
@@ -38,7 +36,9 @@ export class CarFormPage implements OnInit, HasDirtyForm {
   private readonly createCar = inject(CreateCarUseCase);
   private readonly updateCar = inject(UpdateCarUseCase);
 
+  readonly driveTypes = ['FWD', 'RWD', 'AWD'];
   readonly carTypes = ['sedan', 'hatchback', 'suv', 'mpv', 'coupe', 'convertible', 'van', 'pickup', 'bus', 'other'];
+  readonly statuses = ['available', 'order'];
   readonly engineTypes = ['petrol', 'diesel', 'electric', 'hybrid', 'other'];
 
   readonly loadingCar = signal(false);

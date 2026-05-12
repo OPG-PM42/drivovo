@@ -3,120 +3,103 @@
 </div>
 
 @if (loadingCar()) {
-  <div class="center"><mat-spinner /></div>
+  <tui-loader [overlay]="true" [loading]="true">
+    <div class="loading-placeholder"></div>
+  </tui-loader>
 } @else {
-  <mat-card>
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" />
-            @if (form.controls.name.invalid && form.controls.name.touched) {
-              <mat-error>Name is required</mat-error>
-            }
-          </mat-form-field>
+  <tui-loader [overlay]="true" [loading]="saving()">
+    <form tuiForm="m" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <tui-textfield>
+          <label tuiLabel>Name</label>
+          <input tuiTextfield formControlName="name" />
+        </tui-textfield>
+        <tui-error formControlName="name" />
 
-          <mat-form-field appearance="outline">
-            <mat-label>Brand</mat-label>
-            <input matInput formControlName="brand" />
-            @if (form.controls.brand.invalid && form.controls.brand.touched) {
-              <mat-error>Brand is required</mat-error>
-            }
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Brand</label>
+          <input tuiTextfield formControlName="brand" />
+        </tui-textfield>
+        <tui-error formControlName="brand" />
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="3"></textarea>
-          </mat-form-field>
+        <tui-textfield class="full-width">
+          <label tuiLabel>Description</label>
+          <textarea tuiTextarea formControlName="description" rows="3"></textarea>
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Drive Type</mat-label>
-            <mat-select formControlName="driveType">
-              <mat-option value="FWD">FWD</mat-option>
-              <mat-option value="RWD">RWD</mat-option>
-              <mat-option value="AWD">AWD</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Drive Type</label>
+          <select tuiSelect formControlName="driveType" [items]="driveTypes"></select>
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Car Type</mat-label>
-            <mat-select formControlName="type">
-              @for (t of carTypes; track t) {
-                <mat-option [value]="t">{{ t }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Car Type</label>
+          <select tuiSelect formControlName="type" [items]="carTypes"></select>
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option value="available">Available</mat-option>
-              <mat-option value="order">Order</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Status</label>
+          <select tuiSelect formControlName="status" [items]="statuses"></select>
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Engine Type</mat-label>
-            <mat-select formControlName="engineType">
-              @for (t of engineTypes; track t) {
-                <mat-option [value]="t">{{ t }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Engine Type</label>
+          <select tuiSelect formControlName="engineType" [items]="engineTypes"></select>
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Engine Capacity</mat-label>
-            <input matInput formControlName="engineCapacity" placeholder="e.g. 2.0L" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Engine Capacity</label>
+          <input tuiTextfield formControlName="engineCapacity" placeholder="e.g. 2.0L" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Fuel Consumption</mat-label>
-            <input matInput formControlName="engineFuelCons" placeholder="e.g. 7.5L/100km" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Fuel Consumption</label>
+          <input tuiTextfield formControlName="engineFuelCons" placeholder="e.g. 7.5L/100km" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Color</mat-label>
-            <input matInput formControlName="color" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Color</label>
+          <input tuiTextfield formControlName="color" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Interior Trim</mat-label>
-            <input matInput formControlName="interiorTrim" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Interior Trim</label>
+          <input tuiTextfield formControlName="interiorTrim" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Power</mat-label>
-            <input matInput formControlName="power" placeholder="e.g. 150hp" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Power</label>
+          <input tuiTextfield formControlName="power" placeholder="e.g. 150hp" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Acceleration (0-100)</mat-label>
-            <input matInput formControlName="acceleration" placeholder="e.g. 8.5s" />
-          </mat-form-field>
+        <tui-textfield>
+          <label tuiLabel>Acceleration (0-100)</label>
+          <input tuiTextfield formControlName="acceleration" placeholder="e.g. 8.5s" />
+        </tui-textfield>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>URL</mat-label>
-            <input matInput formControlName="url" />
-          </mat-form-field>
-        </div>
+        <tui-textfield class="full-width">
+          <label tuiLabel>URL</label>
+          <input tuiTextfield formControlName="url" />
+        </tui-textfield>
+      </div>
 
-        <app-image-array-editor
-          [formArray]="imagesArray"
-          (addRow)="addImage()"
-        />
+      <app-image-array-editor
+        [formArray]="imagesArray"
+        (addRow)="addImage()"
+      />
 
-        @if (apiError()) {
-          <p class="error-message">{{ apiError() }}</p>
-        }
+      @if (apiError()) {
+        <p class="error-message">{{ apiError() }}</p>
+      }
 
-        <div class="form-actions">
-          <button mat-button type="button" (click)="router.navigate(['/cars'])">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="saving()">
-            @if (saving()) { <mat-spinner diameter="18" /> } @else { Save }
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      <div class="form-actions">
+        <button tuiButton type="button" appearance="outline" (click)="router.navigate(['/cars'])">
+          Cancel
+        </button>
+        <button tuiButton type="submit" appearance="primary" [disabled]="saving()">
+          Save
+        </button>
+      </div>
+    </form>
+  </tui-loader>
 }
