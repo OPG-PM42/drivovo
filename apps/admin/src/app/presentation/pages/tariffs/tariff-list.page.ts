@@ -1,13 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TuiTable, TuiTablePagination, TuiTablePaginationEvent } from '@taiga-ui/addon-table';
+import { TuiButton, TuiLoader, TuiTextfield } from '@taiga-ui/core';
+import { TuiSelect } from '@taiga-ui/kit';
 import { TariffEntity } from '../../../domain/tariff';
 import { GetTariffsUseCase } from '../../../application/use-cases/get-tariffs.use-case';
 import { DeleteTariffUseCase } from '../../../application/use-cases/delete-tariff.use-case';
@@ -18,13 +14,12 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
   standalone: true,
   imports: [
     FormsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatProgressSpinnerModule,
+    TuiTable,
+    TuiTablePagination,
+    TuiButton,
+    TuiLoader,
+    TuiTextfield,
+    ...TuiSelect,
   ],
   templateUrl: './tariff-list.page.html',
   styleUrl: './tariff-list.page.scss',
@@ -36,12 +31,14 @@ export class TariffListPage implements OnInit {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly columns = ['name', 'type', 'options', 'actions'];
-  readonly pageSize = 20;
+  readonly sizeOptions = [10, 20, 50] as const;
+  readonly filterOptions = ['', 'leasing', 'subscription'] as const;
   readonly loading = signal(false);
   readonly items = signal<TariffEntity[]>([]);
   readonly total = signal(0);
   readonly pageIndex = signal(0);
-  typeFilter: '' | TariffEntity['type'] = '';
+  readonly pageSize = signal(20);
+  readonly typeFilter = signal<'' | TariffEntity['type']>('');
 
   ngOnInit(): void {
     this.load();
@@ -49,10 +46,11 @@ export class TariffListPage implements OnInit {
 
   private load(): void {
     this.loading.set(true);
+    const filter = this.typeFilter();
     const params = {
       page: this.pageIndex(),
-      limit: this.pageSize,
-      ...(this.typeFilter ? { type: this.typeFilter } : {}),
+      limit: this.pageSize(),
+      ...(filter ? { type: filter as TariffEntity['type'] } : {}),
     };
     this.getTariffs.execute(params).subscribe({
       next: ({ items, total }) => {
@@ -64,13 +62,15 @@ export class TariffListPage implements OnInit {
     });
   }
 
-  onFilterChange(): void {
+  onFilterChange(value: '' | TariffEntity['type']): void {
+    this.typeFilter.set(value);
     this.pageIndex.set(0);
     this.load();
   }
 
-  onPage(event: PageEvent): void {
-    this.pageIndex.set(event.pageIndex);
+  onPagination(event: TuiTablePaginationEvent): void {
+    this.pageIndex.set(event.page);
+    this.pageSize.set(event.size);
     this.load();
   }
 
