@@ -1,11 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { SignInUseCase } from '../../../application/use-cases/sign-in.use-case';
 import { AuthStore } from '../../../infrastructure/state/auth.store';
 
@@ -14,11 +10,10 @@ import { AuthStore } from '../../../infrastructure/state/auth.store';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
+    TuiButton,
+    ...TuiError,
+    TuiLoader,
+    TuiTextfield,
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
