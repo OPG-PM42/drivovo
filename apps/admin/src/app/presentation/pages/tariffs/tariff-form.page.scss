@@ -6,4 +6,4 @@
 .small-field { width: 100px; }
 .center { display: flex; justify-content: center; padding: 40px; }
 .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-.error-message { color: #c62828; }
+.error-message { color: var(--tui-status-negative); }

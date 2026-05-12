@@ -1,13 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
+import { TuiSelect } from '@taiga-ui/kit';
+import { TuiForm } from '@taiga-ui/layout';
 import { tariffCreateSchema, TariffEntity } from '@drivovo/domain';
 import { HasDirtyForm } from '../../guards/dirty-form.guard';
 import { GetTariffByIdUseCase } from '../../../application/use-cases/get-tariff-by-id.use-case';
@@ -31,18 +27,19 @@ interface OptionFormControls {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
+    TuiButton,
+    ...TuiError,
+    TuiLoader,
+    TuiTextfield,
+    ...TuiSelect,
+    TuiForm,
   ],
   templateUrl: './tariff-form.page.html',
   styleUrl: './tariff-form.page.scss',
 })
 export class TariffFormPage implements OnInit, HasDirtyForm {
+  readonly typeOptions: TariffEntity['type'][] = ['leasing', 'subscription'];
+
   readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
