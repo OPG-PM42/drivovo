@@ -67,6 +67,8 @@ export async function buildApp({
       );
   });
 
+  app.get('/health', async () => ({ status: 'ok' }));
+
   for (const [namespace, endpoints] of Object.entries(endpointMap)) {
     for (const endpoint of endpoints as Endpoint[]) {
       app.route({
