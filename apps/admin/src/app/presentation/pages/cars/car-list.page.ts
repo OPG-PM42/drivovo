@@ -5,11 +5,10 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog } from '@angular/material/dialog';
 import { CarEntity } from '../../../domain/car';
 import { GetCarsUseCase } from '../../../application/use-cases/get-cars.use-case';
 import { DeleteCarUseCase } from '../../../application/use-cases/delete-car.use-case';
-import { ConfirmDialogComponent } from '../../shared/ui/confirm-dialog.component';
+import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 
 @Component({
   selector: 'app-car-list-page',
@@ -81,7 +80,7 @@ export class CarListPage implements OnInit {
   readonly router = inject(Router);
   private readonly getCars = inject(GetCarsUseCase);
   private readonly deleteCar = inject(DeleteCarUseCase);
-  private readonly dialog = inject(MatDialog);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly columns = ['name', 'brand', 'type', 'status', 'actions'];
   readonly pageSize = 20;
@@ -116,13 +115,16 @@ export class CarListPage implements OnInit {
   }
 
   delete(car: CarEntity): void {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Car', message: `Delete "${car.name}"?`, confirmLabel: 'Delete' },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.deleteCar.execute(car.id).subscribe(() => this.load());
-      }
-    });
+    this.confirmDialog
+      .confirm({
+        title: 'Delete Car',
+        message: `Delete "${car.name}"?`,
+        confirmLabel: 'Delete',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteCar.execute(car.id).subscribe(() => this.load());
+        }
+      });
   }
 }

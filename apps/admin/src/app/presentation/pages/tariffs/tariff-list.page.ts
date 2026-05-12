@@ -8,11 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog } from '@angular/material/dialog';
 import { TariffEntity } from '../../../domain/tariff';
 import { GetTariffsUseCase } from '../../../application/use-cases/get-tariffs.use-case';
 import { DeleteTariffUseCase } from '../../../application/use-cases/delete-tariff.use-case';
-import { ConfirmDialogComponent } from '../../shared/ui/confirm-dialog.component';
+import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 
 @Component({
   selector: 'app-tariff-list-page',
@@ -34,7 +33,7 @@ export class TariffListPage implements OnInit {
   readonly router = inject(Router);
   private readonly getTariffs = inject(GetTariffsUseCase);
   private readonly deleteTariff = inject(DeleteTariffUseCase);
-  private readonly dialog = inject(MatDialog);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly columns = ['name', 'type', 'options', 'actions'];
   readonly pageSize = 20;
@@ -80,13 +79,16 @@ export class TariffListPage implements OnInit {
   }
 
   delete(tariff: TariffEntity): void {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Tariff', message: `Delete "${tariff.name}"?`, confirmLabel: 'Delete' },
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.deleteTariff.execute(tariff.id).subscribe(() => this.load());
-      }
-    });
+    this.confirmDialog
+      .confirm({
+        title: 'Delete Tariff',
+        message: `Delete "${tariff.name}"?`,
+        confirmLabel: 'Delete',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.deleteTariff.execute(tariff.id).subscribe(() => this.load());
+        }
+      });
   }
 }
