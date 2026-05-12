@@ -5,7 +5,6 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { NG_EVENT_PLUGINS } from '@taiga-ui/event-plugins';
 import { tuiValidationErrorsProvider } from '@taiga-ui/core';
@@ -24,7 +23,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
     provideHttpClient(withInterceptors([withCredentialsInterceptor, errorInterceptor])),
-    provideAnimations(),
     provideAnimationsAsync(),
     ...NG_EVENT_PLUGINS,
     tuiValidationErrorsProvider({
