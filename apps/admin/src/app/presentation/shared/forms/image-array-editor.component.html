@@ -1,30 +1,40 @@
-
-    <div class="images-header">
-      <strong>Images</strong>
-      <button mat-stroked-button type="button" (click)="addRow.emit()">
-        <mat-icon>add</mat-icon> Add image
-      </button>
-    </div>
-    @for (group of formArray.controls; track $index) {
-      <div class="image-row" [formGroup]="group">
-        <mat-form-field appearance="outline" class="url-field">
-          <mat-label>URL</mat-label>
-          <input matInput formControlName="url" />
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Alt</mat-label>
-          <input matInput formControlName="alt" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="small-field">
-          <mat-label>W</mat-label>
-          <input matInput type="number" formControlName="width" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="small-field">
-          <mat-label>H</mat-label>
-          <input matInput type="number" formControlName="height" />
-        </mat-form-field>
-        <button mat-icon-button type="button" color="warn" (click)="formArray.removeAt($index)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    }
+<div class="images-header">
+  <strong>Images</strong>
+  <button
+    tuiButton
+    appearance="outline"
+    iconStart="@tui.plus"
+    size="s"
+    type="button"
+    (click)="addRow.emit()"
+  >
+    Add image
+  </button>
+</div>
+@for (group of formArray().controls; track $index) {
+  <div class="image-row" [formGroup]="group">
+    <tui-textfield class="url-field">
+      <label tuiLabel>URL</label>
+      <input tuiTextfield formControlName="url" />
+    </tui-textfield>
+    <tui-textfield>
+      <label tuiLabel>Alt</label>
+      <input tuiTextfield formControlName="alt" />
+    </tui-textfield>
+    <tui-textfield class="small-field">
+      <label tuiLabel>W</label>
+      <input tuiTextfield type="number" formControlName="width" />
+    </tui-textfield>
+    <tui-textfield class="small-field">
+      <label tuiLabel>H</label>
+      <input tuiTextfield type="number" formControlName="height" />
+    </tui-textfield>
+    <button
+      tuiIconButton
+      iconStart="@tui.trash"
+      appearance="flat"
+      type="button"
+      (click)="formArray().removeAt($index)"
+    ></button>
+  </div>
+}
