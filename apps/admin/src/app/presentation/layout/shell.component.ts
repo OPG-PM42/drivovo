@@ -21,57 +21,8 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
     MatIconModule,
     MatButtonModule,
   ],
-  template: `
-    <mat-sidenav-container class="sidenav-container">
-      <mat-sidenav mode="side" opened class="sidenav">
-        <div class="sidenav-brand">Drivovo Admin</div>
-        <mat-nav-list>
-          <a mat-list-item routerLink="/cars" routerLinkActive="active-link">
-            <mat-icon matListItemIcon>directions_car</mat-icon>
-            <span matListItemTitle>Cars</span>
-          </a>
-          <a mat-list-item routerLink="/tariffs" routerLinkActive="active-link">
-            <mat-icon matListItemIcon>receipt_long</mat-icon>
-            <span matListItemTitle>Tariffs</span>
-          </a>
-        </mat-nav-list>
-      </mat-sidenav>
-
-      <mat-sidenav-content>
-        <mat-toolbar color="primary">
-          <span class="toolbar-title">Drivovo Admin</span>
-          <span class="spacer"></span>
-          @if (authStore.admin(); as admin) {
-            <span class="admin-name">{{ admin.name }}</span>
-          }
-          <button mat-icon-button (click)="onSignOut()" title="Sign out">
-            <mat-icon>logout</mat-icon>
-          </button>
-        </mat-toolbar>
-
-        <div class="content">
-          <router-outlet />
-        </div>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
-  `,
-  styles: `
-    .sidenav-container { height: 100vh; }
-    .sidenav { width: 220px; }
-    .sidenav-brand {
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #3f51b5;
-      border-bottom: 1px solid rgba(0,0,0,0.12);
-      margin-bottom: 8px;
-    }
-    .active-link { background: rgba(63, 81, 181, 0.12) !important; }
-    .toolbar-title { font-size: 18px; font-weight: 500; }
-    .spacer { flex: 1 1 auto; }
-    .admin-name { margin-right: 8px; font-size: 14px; }
-    .content { padding: 24px; }
-  `,
+  templateUrl: './shell.component.html',
+  styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
   readonly authStore = inject(AuthStore);

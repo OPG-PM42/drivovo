@@ -1,0 +1,6 @@
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.header-actions { display: flex; gap: 16px; align-items: center; }
+.type-filter { width: 160px; }
+.center { display: flex; justify-content: center; padding: 40px; }
+.empty-state { text-align: center; color: #888; padding: 40px; }
+mat-table { width: 100%; }

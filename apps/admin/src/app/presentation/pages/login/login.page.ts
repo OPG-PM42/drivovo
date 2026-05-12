@@ -20,64 +20,8 @@ import { AuthStore } from '../../../infrastructure/state/auth.store';
     MatButtonModule,
     MatProgressSpinnerModule,
   ],
-  template: `
-    <div class="login-container">
-      <mat-card class="login-card">
-        <mat-card-header>
-          <mat-card-title>Drivovo Admin</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" autocomplete="email" />
-              @if (form.controls.email.invalid && form.controls.email.touched) {
-                <mat-error>Valid email is required</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Password</mat-label>
-              <input matInput type="password" formControlName="password" autocomplete="current-password" />
-              @if (form.controls.password.invalid && form.controls.password.touched) {
-                <mat-error>Password must be at least 8 characters</mat-error>
-              }
-            </mat-form-field>
-
-            @if (errorMessage()) {
-              <p class="error-message">{{ errorMessage() }}</p>
-            }
-
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="full-width"
-              [disabled]="loading()"
-            >
-              @if (loading()) {
-                <mat-spinner diameter="20" />
-              } @else {
-                Sign In
-              }
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: `
-    .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #f5f5f5;
-    }
-    .login-card { width: 400px; padding: 16px; }
-    .full-width { width: 100%; margin-bottom: 12px; }
-    .error-message { color: #c62828; margin-bottom: 12px; }
-  `,
+  templateUrl: './login.page.html',
+  styleUrl: './login.page.scss',
 })
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
@@ -88,7 +32,7 @@ export class LoginPage {
   readonly loading = signal(false);
   readonly errorMessage = signal('');
 
-  readonly form = this.fb.group({
+  readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
@@ -102,7 +46,7 @@ export class LoginPage {
     this.errorMessage.set('');
 
     const { email, password } = this.form.getRawValue();
-    this.signIn.execute(email!, password!).subscribe({
+    this.signIn.execute(email, password).subscribe({
       next: (admin) => {
         this.loading.set(false);
         this.authStore.setAdmin(admin);

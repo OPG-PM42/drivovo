@@ -1,0 +1,87 @@
+
+    <div class="page-header">
+      <h1>{{ isEdit ? 'Edit Tariff' : 'New Tariff' }}</h1>
+    </div>
+
+    @if (loadingTariff()) {
+      <div class="center"><mat-spinner /></div>
+    } @else {
+      <mat-card>
+        <mat-card-content>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" />
+                @if (form.controls.name.invalid && form.controls.name.touched) {
+                  <mat-error>Name is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="leasing">Leasing</mat-option>
+                  <mat-option value="subscription">Subscription</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="options-section">
+              <div class="options-header">
+                <strong>Options</strong>
+                <button mat-stroked-button type="button" (click)="addOption()">
+                  <mat-icon>add</mat-icon> Add Option
+                </button>
+              </div>
+
+              @for (group of optionsArray.controls; track $index) {
+                <div class="option-row" [formGroup]="group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" />
+                  </mat-form-field>
+
+                  <ng-container formGroupName="price">
+                    <mat-form-field appearance="outline" class="small-field">
+                      <mat-label>Price</mat-label>
+                      <input matInput type="number" formControlName="value" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="small-field">
+                      <mat-label>Currency</mat-label>
+                      <input matInput formControlName="currency" placeholder="USD" />
+                    </mat-form-field>
+                  </ng-container>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Car ID (optional)</mat-label>
+                    <input matInput formControlName="carId" />
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Country ID (optional)</mat-label>
+                    <input matInput formControlName="countryId" />
+                  </mat-form-field>
+
+                  <button mat-icon-button type="button" color="warn" (click)="optionsArray.removeAt($index)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (apiError()) {
+              <p class="error-message">{{ apiError() }}</p>
+            }
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="router.navigate(['/tariffs'])">Cancel</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="saving()">
+                @if (saving()) { <mat-spinner diameter="18" /> } @else { Save }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
