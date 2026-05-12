@@ -6,6 +6,9 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { NG_EVENT_PLUGINS } from '@taiga-ui/event-plugins';
+import { tuiValidationErrorsProvider } from '@taiga-ui/core';
 import { appRoutes } from './app.routes';
 import { withCredentialsInterceptor, errorInterceptor } from './infrastructure/http';
 import { AdminErrorHandler } from './infrastructure/error-handler';
@@ -22,6 +25,18 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     provideHttpClient(withInterceptors([withCredentialsInterceptor, errorInterceptor])),
     provideAnimations(),
+    provideAnimationsAsync(),
+    ...NG_EVENT_PLUGINS,
+    tuiValidationErrorsProvider({
+      required: 'Поле обязательно для заполнения',
+      email: 'Некорректный e-mail',
+      minlength: ({ requiredLength }: { requiredLength: number }) =>
+        `Минимум ${requiredLength} символов`,
+      maxlength: ({ requiredLength }: { requiredLength: number }) =>
+        `Максимум ${requiredLength} символов`,
+      min: ({ min }: { min: number }) => `Минимум ${min}`,
+      max: ({ max }: { max: number }) => `Максимум ${max}`,
+    }),
     { provide: ErrorHandler, useClass: AdminErrorHandler },
     { provide: CarRepository, useClass: HttpCarRepository },
     { provide: TariffRepository, useClass: HttpTariffRepository },
