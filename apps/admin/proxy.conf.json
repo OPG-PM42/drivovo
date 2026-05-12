@@ -1,0 +1,18 @@
+{
+  "/auth": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/cars": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/tariffs": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/docs": {
+    "target": "http://localhost:3000",
+    "secure": false
+  }
+}

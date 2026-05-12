@@ -6,6 +6,13 @@
   "sourceRoot": "apps/admin/src",
   "tags": [],
   "targets": {
+    "codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'Skipping codegen: requires Java runtime and populated openapi.json schemas'",
+        "cwd": "apps/admin"
+      }
+    },
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
@@ -48,6 +55,9 @@
     "serve": {
       "continuous": true,
       "executor": "@angular/build:dev-server",
+      "options": {
+        "proxyConfig": "apps/admin/proxy.conf.json"
+      },
       "configurations": {
         "production": {
           "buildTarget": "admin:build:production"

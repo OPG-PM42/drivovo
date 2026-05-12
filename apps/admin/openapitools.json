@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.10.0",
+    "storageDir": "node_modules/.cache/openapi-generator-cli"
+  },
+  "generators": {
+    "admin-api": {
+      "generatorName": "typescript-angular",
+      "inputSpec": "../../apps/backend/openapi.json",
+      "output": "src/app/infrastructure/api/generated",
+      "additionalProperties": {
+        "apiModulePrefix": "Admin",
+        "withInterfaces": true,
+        "useSingleRequestParameter": false
+      }
+    }
+  }
+}

@@ -6,9 +6,10 @@ export type {
   EndpointError,
   EndpointHandler,
   EndpointMap,
+  EndpointSchema,
   HttpContext,
   HttpMethod,
   ServerConfig,
   Session,
 } from './types';
-export { runServer, type ServerOptions } from './server';
+export { buildApp, runServer, type ServerOptions } from './server';

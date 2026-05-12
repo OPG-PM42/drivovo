@@ -19,16 +19,20 @@
     "migrate:up": "tsx apps/backend/scripts/migrate.ts up",
     "migrate:down": "tsx apps/backend/scripts/migrate.ts down",
     "migrate:status": "tsx apps/backend/scripts/migrate.ts status",
-    "migrate:create": "tsx apps/backend/scripts/migrate.ts create"
+    "migrate:create": "tsx apps/backend/scripts/migrate.ts create",
+    "seed:admin": "tsx apps/backend/scripts/seed-admin.ts"
   },
   "workspaces": [
     "libs/*"
   ],
   "dependencies": {
+    "@angular/animations": "^21.1.5",
+    "@angular/cdk": "^21.1.5",
     "@angular/common": "~21.1.0",
     "@angular/compiler": "~21.1.0",
     "@angular/core": "~21.1.0",
     "@angular/forms": "~21.1.0",
+    "@angular/material": "^21.1.5",
     "@angular/platform-browser": "~21.1.0",
     "@angular/router": "~21.1.0",
     "kysely": "^0.28.15",
@@ -55,6 +59,7 @@
     "@nx/node": "^22.5.2",
     "@nx/web": "22.5.2",
     "@nx/workspace": "22.5.2",
+    "@openapitools/openapi-generator-cli": "^2.32.0",
     "@schematics/angular": "^21.1.4",
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.5",

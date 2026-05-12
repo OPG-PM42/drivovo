@@ -47,6 +47,15 @@ export type EndpointHandler<B, Q, P, R> = (
   ctx: HttpContext<B, Q, P>,
 ) => Promise<R> | R;
 
+export interface EndpointSchema {
+  body?: unknown;
+  querystring?: unknown;
+  params?: unknown;
+  response?: Record<number, unknown>;
+  tags?: string[];
+  summary?: string;
+}
+
 export interface Endpoint<
   B = unknown,
   Q = unknown,
@@ -58,6 +67,7 @@ export interface Endpoint<
   access?: Access;
   handler: EndpointHandler<B, Q, P, R>;
   errors?: Record<string, EndpointError>;
+  schema?: EndpointSchema;
 }
 
 export type EndpointMap = Record<string, Endpoint[]>;
