@@ -2,8 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
-import { SignInUseCase } from '../../../application/use-cases/sign-in.use-case';
-import { AuthStore } from '../../../application/state/auth.store';
+import { AuthFacade } from '../../../application/state/auth.facade';
 
 @Component({
   selector: 'app-login-page',
@@ -20,8 +19,7 @@ import { AuthStore } from '../../../application/state/auth.store';
 })
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
-  private readonly signIn = inject(SignInUseCase);
-  private readonly authStore = inject(AuthStore);
+  private readonly authFacade = inject(AuthFacade);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -41,10 +39,9 @@ export class LoginPage {
     this.errorMessage.set('');
 
     const { email, password } = this.form.getRawValue();
-    this.signIn.execute(email, password).subscribe({
-      next: (admin) => {
+    this.authFacade.signIn(email, password).subscribe({
+      next: () => {
         this.loading.set(false);
-        this.authStore.setAdmin(admin);
         this.router.navigate(['/']);
       },
       error: (err) => {

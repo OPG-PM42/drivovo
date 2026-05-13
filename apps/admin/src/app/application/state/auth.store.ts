@@ -10,10 +10,12 @@ export class AuthStore {
   readonly isAuthenticated = computed(() => this._admin() !== null);
   readonly loading = computed(() => this._loading());
 
+  /** @internal — only AuthFacade may call this. ESLint enforcement comes in Phase 7. */
   setAdmin(admin: AdminEntity | null): void {
     this._admin.set(admin);
   }
 
+  /** @internal — only AuthFacade may call this. ESLint enforcement comes in Phase 7. */
   setLoading(loading: boolean): void {
     this._loading.set(loading);
   }

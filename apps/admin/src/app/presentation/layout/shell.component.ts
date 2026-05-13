@@ -1,8 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TuiRoot, TuiButton, TuiIcon, TuiLink } from '@taiga-ui/core';
-import { AuthStore } from '../../application/state/auth.store';
-import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
+import { AuthFacade } from '../../application/state/auth.facade';
 
 @Component({
   selector: 'app-shell',
@@ -20,16 +19,12 @@ import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
   styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
-  readonly authStore = inject(AuthStore);
-  private readonly signOut = inject(SignOutUseCase);
+  readonly authFacade = inject(AuthFacade);
   private readonly router = inject(Router);
 
   onSignOut(): void {
-    this.signOut.execute().subscribe({
-      complete: () => {
-        this.authStore.setAdmin(null);
-        this.router.navigate(['/login']);
-      },
+    this.authFacade.signOut().subscribe({
+      complete: () => this.router.navigate(['/login']),
     });
   }
 }

@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthStore } from '../../application/state/auth.store';
+import { AuthFacade } from '../../application/state/auth.facade';
 
 export const anonymousGuard: CanActivateFn = () => {
-  const authStore = inject(AuthStore);
+  const facade = inject(AuthFacade);
   const router = inject(Router);
 
-  if (authStore.isAuthenticated()) {
+  if (facade.isAuthenticated()) {
     return router.createUrlTree(['/']);
   }
   return true;

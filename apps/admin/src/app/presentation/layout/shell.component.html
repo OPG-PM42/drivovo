@@ -17,7 +17,7 @@
     <header class="toolbar">
       <span class="toolbar-title">Drivovo Admin</span>
       <span class="spacer"></span>
-      @if (authStore.admin(); as admin) {
+      @if (authFacade.admin(); as admin) {
         <span class="admin-name">{{ admin.name }}</span>
       }
       <button

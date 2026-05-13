@@ -1,23 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { GetCurrentAdminUseCase } from '../../application/use-cases/get-current-admin.use-case';
-import { AuthStore } from '../../application/state/auth.store';
+import { AuthFacade } from '../../application/state/auth.facade';
 
 export const authGuard: CanActivateFn = () => {
-  const authStore = inject(AuthStore);
+  const facade = inject(AuthFacade);
   const router = inject(Router);
-  const getCurrentAdmin = inject(GetCurrentAdminUseCase);
 
-  if (authStore.isAuthenticated()) {
-    return true;
-  }
+  if (facade.isAuthenticated()) return of(true);
 
-  return getCurrentAdmin.execute().pipe(
-    map((admin) => {
-      authStore.setAdmin(admin);
-      return true;
-    }),
+  return facade.loadCurrent().pipe(
+    map((admin) => admin ? true : router.createUrlTree(['/login'])),
     catchError(() => of(router.createUrlTree(['/login']))),
   );
 };
