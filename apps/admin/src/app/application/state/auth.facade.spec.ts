@@ -87,6 +87,7 @@ describe('AuthFacade', () => {
     const subj = new Subject<AdminEntity>();
     loadUC.execute.mockReturnValue(subj.asObservable());
     let received = 0;
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const next = () => { if (++received === 2) finish(); };
 
     facade.loadCurrent().subscribe({ next });

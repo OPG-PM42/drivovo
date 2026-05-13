@@ -15,10 +15,12 @@ export class AdminErrorHandler implements ErrorHandler {
         this.facade.signOutLocal();
         void this.router.navigate(['/login']);
       });
+      // eslint-disable-next-line no-console
       console.warn('[AdminErrorHandler] forced sign-out due to 401');
       return;
     }
 
+    // eslint-disable-next-line no-console
     console.error('[AdminErrorHandler]', error);
   }
 }

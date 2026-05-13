@@ -17,6 +17,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         case 401:
           return throwError(() => new UnauthorizedError());
         case 404: {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           const { resource, id } = parseResourceFromUrl(req.url);
           return throwError(() => new NotFoundError(resource, id));
         }
