@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AdminEntity } from '../../../domain/admin';
 import { AuthRepository } from '../../../application/ports/auth.repository';
+import { AUTH_ME_PATH } from '../../http/auth-paths';
 
 @Injectable()
 export class HttpAuthRepository implements AuthRepository {
@@ -17,6 +18,6 @@ export class HttpAuthRepository implements AuthRepository {
   }
 
   getCurrentAdmin(): Observable<AdminEntity> {
-    return this.http.get<AdminEntity>('/auth/me');
+    return this.http.get<AdminEntity>(AUTH_ME_PATH);
   }
 }
