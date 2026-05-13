@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TuiRoot, TuiButton, TuiIcon, TuiLink } from '@taiga-ui/core';
-import { AuthStore } from '../../infrastructure/state/auth.store';
+import { AuthStore } from '../../application/state/auth.store';
 import { SignOutUseCase } from '../../application/use-cases/sign-out.use-case';
 
 @Component({

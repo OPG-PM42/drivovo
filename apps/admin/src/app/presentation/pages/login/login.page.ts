@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { SignInUseCase } from '../../../application/use-cases/sign-in.use-case';
-import { AuthStore } from '../../../infrastructure/state/auth.store';
+import { AuthStore } from '../../../application/state/auth.store';
 
 @Component({
   selector: 'app-login-page',
