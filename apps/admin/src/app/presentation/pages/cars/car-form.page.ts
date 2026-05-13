@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { TuiSelect, TuiTextarea } from '@taiga-ui/kit';
 import { TuiForm } from '@taiga-ui/layout';
@@ -30,6 +31,7 @@ import { UpdateCarUseCase } from '../../../application/use-cases/update-car.use-
 })
 export class CarFormPage implements OnInit, HasDirtyForm {
   readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly getCarById = inject(GetCarByIdUseCase);
@@ -79,7 +81,7 @@ export class CarFormPage implements OnInit, HasDirtyForm {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.loadingCar.set(true);
-      this.getCarById.execute(id).subscribe({
+      this.getCarById.execute(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (car) => {
           this.form.patchValue({
             name: car.name,
@@ -146,7 +148,7 @@ export class CarFormPage implements OnInit, HasDirtyForm {
       ? this.updateCar.execute(id, parsed.data)
       : this.createCar.execute(parsed.data);
 
-    op$.subscribe({
+    op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.form.markAsPristine();
         this.router.navigate(['/cars']);

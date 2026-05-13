@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TuiRoot, TuiButton, TuiIcon, TuiLink } from '@taiga-ui/core';
 import { AuthFacade } from '../../application/state/auth.facade';
@@ -20,10 +21,13 @@ import { AuthFacade } from '../../application/state/auth.facade';
 })
 export class ShellComponent {
   readonly authFacade = inject(AuthFacade);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
   onSignOut(): void {
-    this.authFacade.signOut().subscribe({
+    this.authFacade.signOut().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       complete: () => this.router.navigate(['/login']),
     });
   }

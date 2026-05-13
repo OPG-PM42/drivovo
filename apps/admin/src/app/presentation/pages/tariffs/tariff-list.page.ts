@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TuiTable, TuiTablePagination, TuiTablePaginationEvent } from '@taiga-ui/addon-table';
@@ -26,6 +27,7 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 })
 export class TariffListPage implements OnInit {
   readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly getTariffs = inject(GetTariffsUseCase);
   private readonly deleteTariff = inject(DeleteTariffUseCase);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -52,7 +54,9 @@ export class TariffListPage implements OnInit {
       limit: this.pageSize(),
       ...(filter ? { type: filter as TariffEntity['type'] } : {}),
     };
-    this.getTariffs.execute(params).subscribe({
+    this.getTariffs.execute(params).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: ({ items, total }) => {
         this.items.set(items);
         this.total.set(total);
@@ -85,9 +89,12 @@ export class TariffListPage implements OnInit {
         message: `Delete "${tariff.name}"?`,
         confirmLabel: 'Delete',
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteTariff.execute(tariff.id).subscribe(() => this.load());
+          this.deleteTariff.execute(tariff.id).pipe(
+            takeUntilDestroyed(this.destroyRef),
+          ).subscribe(() => this.load());
         }
       });
   }

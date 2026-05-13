@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
@@ -20,6 +21,7 @@ import { AuthFacade } from '../../../application/state/auth.facade';
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly authFacade = inject(AuthFacade);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -39,7 +41,9 @@ export class LoginPage {
     this.errorMessage.set('');
 
     const { email, password } = this.form.getRawValue();
-    this.authFacade.signIn(email, password).subscribe({
+    this.authFacade.signIn(email, password).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
         this.loading.set(false);
         this.router.navigate(['/']);

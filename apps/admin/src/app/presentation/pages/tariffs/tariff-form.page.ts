@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TuiButton, TuiError, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { TuiSelect } from '@taiga-ui/kit';
 import { TuiForm } from '@taiga-ui/layout';
@@ -41,6 +42,7 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
   readonly typeOptions: TariffEntity['type'][] = ['leasing', 'subscription'];
 
   readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly getTariffById = inject(GetTariffByIdUseCase);
@@ -73,7 +75,7 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.loadingTariff.set(true);
-      this.getTariffById.execute(id).subscribe({
+      this.getTariffById.execute(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (tariff) => {
           this.form.patchValue({ name: tariff.name, type: tariff.type });
           tariff.options.forEach((opt) => this.optionsArray.push(this.buildOptionGroup(opt)));
@@ -135,7 +137,7 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
       ? this.updateTariff.execute(id, parsed.data)
       : this.createTariff.execute(parsed.data);
 
-    op$.subscribe({
+    op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.form.markAsPristine();
         this.router.navigate(['/tariffs']);

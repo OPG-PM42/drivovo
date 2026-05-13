@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { TuiTable, TuiTablePagination, TuiTablePaginationEvent } from '@taiga-ui/addon-table';
 import { TuiButton, TuiLoader } from '@taiga-ui/core';
@@ -21,6 +22,7 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 })
 export class CarListPage implements OnInit {
   readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly getCars = inject(GetCarsUseCase);
   private readonly deleteCar = inject(DeleteCarUseCase);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -39,7 +41,9 @@ export class CarListPage implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.getCars.execute({ page: this.pageIndex(), limit: this.pageSize() }).subscribe({
+    this.getCars.execute({ page: this.pageIndex(), limit: this.pageSize() }).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: ({ items, total }) => {
         this.items.set(items);
         this.total.set(total);
@@ -66,9 +70,12 @@ export class CarListPage implements OnInit {
         message: `Delete "${car.name}"?`,
         confirmLabel: 'Delete',
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteCar.execute(car.id).subscribe(() => this.load());
+          this.deleteCar.execute(car.id).pipe(
+            takeUntilDestroyed(this.destroyRef),
+          ).subscribe(() => this.load());
         }
       });
   }
