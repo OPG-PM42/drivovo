@@ -16,57 +16,8 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
     TuiButton,
     TuiLoader,
   ],
-  template: `
-    <div class="page-header">
-      <h1>Cars</h1>
-      <button tuiButton appearance="primary" iconStart="@tui.plus" (click)="router.navigate(['/cars/new'])">Add Car</button>
-    </div>
-
-    <tui-loader [loading]="loading()" [overlay]="true">
-      @if (items().length === 0 && !loading()) {
-        <p class="empty-state">No cars found.</p>
-      } @else {
-        <table tuiTable [columns]="columns">
-          <thead>
-            <tr tuiThGroup>
-              <th *tuiHead="'name'" tuiTh>Name</th>
-              <th *tuiHead="'brand'" tuiTh>Brand</th>
-              <th *tuiHead="'type'" tuiTh>Type</th>
-              <th *tuiHead="'status'" tuiTh>Status</th>
-              <th *tuiHead="'actions'" tuiTh></th>
-            </tr>
-          </thead>
-          <tbody tuiTbody>
-            @for (row of items(); track row.id) {
-              <tr tuiTr>
-                <td *tuiCell="'name'" tuiTd>{{ row.name }}</td>
-                <td *tuiCell="'brand'" tuiTd>{{ row.brand }}</td>
-                <td *tuiCell="'type'" tuiTd>{{ row.type }}</td>
-                <td *tuiCell="'status'" tuiTd>{{ row.status }}</td>
-                <td *tuiCell="'actions'" tuiTd>
-                  <button tuiIconButton iconStart="@tui.pencil" appearance="flat" (click)="edit(row)"></button>
-                  <button tuiIconButton iconStart="@tui.trash" appearance="flat" (click)="delete(row)"></button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-        <tui-table-pagination
-          [items]="sizeOptions"
-          [total]="total()"
-          [page]="pageIndex()"
-          [size]="pageSize()"
-          (paginationChange)="onPagination($event)"
-        />
-      }
-    </tui-loader>
-  `,
-  styles: `
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .empty-state { text-align: center; color: #888; padding: 40px; }
-    table { width: 100%; }
-  `,
+  templateUrl: './car-list.page.html',
+  styleUrl: './car-list.page.scss',
 })
 export class CarListPage implements OnInit {
   readonly router = inject(Router);

@@ -4,18 +4,13 @@
   justify-content: space-between;
   margin-bottom: 16px;
 }
-.header-actions {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-.type-filter {
-  width: 160px;
-}
+
 .empty-state {
   text-align: center;
+  color: #888;
   padding: 40px;
 }
+
 table {
   width: 100%;
 }
