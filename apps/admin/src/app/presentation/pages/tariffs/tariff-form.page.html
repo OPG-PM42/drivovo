@@ -1,0 +1,78 @@
+
+<div class="page-header">
+  <h1>{{ isEdit ? 'Edit Tariff' : 'New Tariff' }}</h1>
+</div>
+
+@if (loadingTariff()) {
+  <tui-loader [overlay]="true" [loading]="true">
+    <div class="loading-placeholder"></div>
+  </tui-loader>
+} @else {
+  <tui-loader [overlay]="true" [loading]="saving()">
+    <form tuiForm="m" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <tui-textfield>
+          <label tuiLabel>Name</label>
+          <input tuiTextfield formControlName="name" />
+        </tui-textfield>
+        <tui-error formControlName="name" />
+
+        <tui-textfield>
+          <label tuiLabel>Type</label>
+          <select tuiSelect formControlName="type" [items]="typeOptions"></select>
+        </tui-textfield>
+      </div>
+
+      <div class="options-section">
+        <div class="options-header">
+          <strong>Options</strong>
+          <button tuiButton appearance="outline" iconStart="@tui.plus" size="s" type="button" (click)="addOption()">
+            Add Option
+          </button>
+        </div>
+
+        @for (group of optionsArray.controls; track $index) {
+          <div class="option-row" [formGroup]="group">
+            <tui-textfield>
+              <label tuiLabel>Name</label>
+              <input tuiTextfield formControlName="name" />
+            </tui-textfield>
+
+            <ng-container formGroupName="price">
+              <tui-textfield class="small-field">
+                <label tuiLabel>Price</label>
+                <input tuiTextfield type="number" formControlName="value" />
+              </tui-textfield>
+
+              <tui-textfield class="small-field">
+                <label tuiLabel>Currency</label>
+                <input tuiTextfield formControlName="currency" placeholder="USD" />
+              </tui-textfield>
+            </ng-container>
+
+            <tui-textfield>
+              <label tuiLabel>Car ID (optional)</label>
+              <input tuiTextfield formControlName="carId" />
+            </tui-textfield>
+
+            <tui-textfield>
+              <label tuiLabel>Country ID (optional)</label>
+              <input tuiTextfield formControlName="countryId" />
+            </tui-textfield>
+
+            <button tuiIconButton iconStart="@tui.trash" appearance="flat" type="button" (click)="optionsArray.removeAt($index)"></button>
+          </div>
+        }
+      </div>
+
+      @if (apiError()) {
+        <p class="error-message">{{ apiError() }}</p>
+      }
+
+      <div class="form-actions">
+        <button tuiButton type="button" appearance="outline" (click)="router.navigate(['/tariffs'])">Cancel</button>
+        <button tuiButton type="submit" appearance="primary" [disabled]="saving()">Save</button>
+      </div>
+    </form>
+  </tui-loader>
+}

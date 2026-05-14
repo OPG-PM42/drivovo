@@ -14,7 +14,9 @@ const SORT_FIELD_MAP = {
 } as const;
 
 type CarSearchParams = SearchParams<'name' | 'brand' | 'status'>;
-export interface CarRepository extends Repository<CarEntity, CarSearchParams> {}
+export interface CarRepository extends Repository<CarEntity, CarSearchParams> {
+  count(params?: CarSearchParams): Promise<number>;
+}
 
 export default {
   async find(params: CarSearchParams): Promise<CarEntity[]> {
@@ -91,6 +93,18 @@ export default {
         .executeTakeFirst();
 
       return result?.id ?? null;
+    } catch (error) {
+      throw RepositoryError.from(error);
+    }
+  },
+
+  async count(_params?: CarSearchParams): Promise<number> {
+    try {
+      const result = await db
+        .selectFrom('cars')
+        .select((eb) => eb.fn.countAll().as('total'))
+        .executeTakeFirst();
+      return Number(result?.total ?? 0);
     } catch (error) {
       throw RepositoryError.from(error);
     }

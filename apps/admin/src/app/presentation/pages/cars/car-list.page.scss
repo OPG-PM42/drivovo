@@ -1,0 +1,16 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #888;
+  padding: 40px;
+}
+
+table {
+  width: 100%;
+}

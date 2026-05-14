@@ -1,0 +1,36 @@
+<tui-root>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">Drivovo Admin</div>
+      <nav class="nav">
+        <a tuiLink routerLink="/cars" routerLinkActive="active" class="nav-item">
+          <tui-icon icon="@tui.car" />
+          <span>Cars</span>
+        </a>
+        <a tuiLink routerLink="/tariffs" routerLinkActive="active" class="nav-item">
+          <tui-icon icon="@tui.receipt" />
+          <span>Tariffs</span>
+        </a>
+      </nav>
+    </aside>
+
+    <header class="toolbar">
+      <span class="toolbar-title">Drivovo Admin</span>
+      <span class="spacer"></span>
+      @if (authFacade.admin(); as admin) {
+        <span class="admin-name">{{ admin.name }}</span>
+      }
+      <button
+        tuiIconButton
+        iconStart="@tui.log-out"
+        appearance="flat"
+        title="Sign out"
+        (click)="onSignOut()"
+      ></button>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</tui-root>

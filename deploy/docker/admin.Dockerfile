@@ -2,7 +2,11 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# Copy root manifests + workspace package.json files before npm ci
 COPY package.json package-lock.json ./
+COPY libs/domain/package.json libs/domain/
+COPY libs/fastify/package.json libs/fastify/
+COPY libs/utils/package.json libs/utils/
 RUN npm ci
 
 COPY nx.json tsconfig*.json ./

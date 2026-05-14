@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h1>Tariffs</h1>
+  <div class="header-actions">
+    <tui-textfield class="type-filter">
+      <label tuiLabel>Type</label>
+      <select
+        tuiSelect
+        [items]="filterOptions"
+        [ngModel]="typeFilter()"
+        (ngModelChange)="onFilterChange($event)"
+      ></select>
+    </tui-textfield>
+    <button
+      tuiButton
+      appearance="primary"
+      iconStart="@tui.plus"
+      (click)="router.navigate(['/tariffs/new'])"
+    >
+      Add Tariff
+    </button>
+  </div>
+</div>
+
+<tui-loader [loading]="loading()" [overlay]="true">
+  @if (items().length === 0 && !loading()) {
+  <p class="empty-state">No tariffs found.</p>
+  } @else {
+  <table tuiTable [columns]="columns">
+    <thead>
+      <tr tuiThGroup>
+        <th *tuiHead="'name'" tuiTh>Name</th>
+        <th *tuiHead="'type'" tuiTh>Type</th>
+        <th *tuiHead="'options'" tuiTh>Options</th>
+        <th *tuiHead="'actions'" tuiTh></th>
+      </tr>
+    </thead>
+    <tbody tuiTbody>
+      @for (row of items(); track row.id) {
+      <tr tuiTr>
+        <td *tuiCell="'name'" tuiTd>{{ row.name }}</td>
+        <td *tuiCell="'type'" tuiTd>{{ row.type }}</td>
+        <td *tuiCell="'options'" tuiTd>{{ row.options.length }}</td>
+        <td *tuiCell="'actions'" tuiTd>
+          <button
+            tuiIconButton
+            iconStart="@tui.pencil"
+            appearance="flat"
+            (click)="edit(row)"
+          ></button>
+          <button
+            tuiIconButton
+            iconStart="@tui.trash"
+            appearance="flat"
+            (click)="delete(row)"
+          ></button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  <tui-table-pagination
+    [items]="sizeOptions"
+    [total]="total()"
+    [page]="pageIndex()"
+    [size]="pageSize()"
+    (paginationChange)="onPagination($event)"
+  />
+  }
+</tui-loader>

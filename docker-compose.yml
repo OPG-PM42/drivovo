@@ -8,6 +8,7 @@ services:
     environment:
       PORT: 5000
       HOST: 0.0.0.0
+      NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-drivovo}:${POSTGRES_PASSWORD:-drivovo_dev}@db:5432/${POSTGRES_DB:-drivovo}
     depends_on:
       db:

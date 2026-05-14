@@ -24,6 +24,8 @@ export const createAuthEndpoint = (domain) => [
       }
       const token = generateToken();
       await ctx.auth.startSession(token, { adminId: admin.id });
+      const { passwordHash, passwordSalt, ...adminData } = admin;
+      return adminData;
     },
   },
   {
