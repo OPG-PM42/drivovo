@@ -19,4 +19,10 @@ export const createCarEndpoint = (domain) => [
     handler: ({ id }) => domain.cars.getById(id),
     errors: errorMap,
   },
+  {
+    path: '/',
+    method: 'POST',
+    handler: (ctx) => domain.cars.create(ctx.body),
+    errors: errorMap,
+  },
 ];
