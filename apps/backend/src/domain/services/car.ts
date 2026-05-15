@@ -25,8 +25,32 @@ function validate(entity: CarEntity, { partial = false }: { partial?: boolean } 
   }
 }
 
+const fuelTypeEnum = z.enum(['petrol', 'diesel', 'electric', 'hybrid', 'other']);
+const carTypeEnum = z.enum(['sedan', 'hatchback', 'suv', 'mpv', 'coupe', 'convertible', 'van', 'pickup', 'bus', 'other']);
+const oneOrMany = <T extends z.ZodTypeAny>(schema: T): z.ZodUnion<[T, z.ZodArray<T>]> =>
+  z.union([schema, z.array(schema)]);
+
+const carFiltersSchema = z.object({
+  brand: oneOrMany(z.string().min(1)).optional(),
+  type: oneOrMany(carTypeEnum).optional(),
+  fuelType: oneOrMany(fuelTypeEnum).optional(),
+}).passthrough();
+
+type CarFilters = z.infer<typeof carFiltersSchema>;
+
+function parseFilters(query: unknown): CarFilters {
+  const result = carFiltersSchema.safeParse(query ?? {});
+  if (!result.success) {
+    throw new DomainError(
+      DOMAIN_ERRORS.VALIDATION_ERROR,
+      result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+    );
+  }
+  return result.data;
+}
+
 export default ({ repositories: repos }: Dependencies): CarService => ({
-  getAll: () => repos.cars.find(),
+  getAll: (query?: unknown) => repos.cars.find(parseFilters(query)),
   getById: async (id: string) => {
     validateId(id);
     const car = await repos.cars.findOne(id);

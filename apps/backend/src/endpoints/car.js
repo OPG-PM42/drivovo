@@ -6,18 +6,22 @@ const errorMap = {
 
 export const createCarEndpoint = (domain) => [
   {
-    path: "/",
-    method: "GET",
-    handler: domain.cars.getAll,
+    path: '/',
+    method: 'GET',
+    access: 'public',
+    handler: ({ query }) => domain.cars.getAll(query),
+    errors: errorMap,
   },
   {
-    path: "/:id",
-    method: "GET",
+    path: '/:id',
+    method: 'GET',
+    access: 'public',
     handler: ({ id }) => domain.cars.getById(id),
+    errors: errorMap,
   },
   {
-    path: "/",
-    method: "POST",
+    path: '/',
+    method: 'POST',
     handler: (ctx) => domain.cars.create(ctx.body),
     errors: errorMap,
   },
