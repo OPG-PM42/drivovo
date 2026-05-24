@@ -17,7 +17,7 @@ const SORT_FIELD_MAP = {
   updated_at: 'updated_at',
 } as const;
 
-type UserSearchParams = SearchParams<keyof typeof SORT_FIELD_MAP>;
+export type UserSearchParams = SearchParams<keyof typeof SORT_FIELD_MAP>;
 
 export interface UserRepository extends Repository<UserEntity, UserSearchParams> {
   findByEmail(email: string): Promise<UserEntity | null>;
