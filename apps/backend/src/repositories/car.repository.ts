@@ -21,7 +21,7 @@ export interface CarFilters {
   fuelType?: FuelType | FuelType[];
 }
 
-type CarSearchParams = SearchParams<'name' | 'brand' | 'status'> & CarFilters;
+export type CarSearchParams = SearchParams<'name' | 'brand' | 'status'> & CarFilters;
 export interface CarRepository extends Repository<CarEntity, CarSearchParams> {}
 
 const toArray = <T>(v: T | T[] | undefined): T[] | undefined =>
