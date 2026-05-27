@@ -105,9 +105,11 @@ export default ({ repositories: repos }: Dependencies): CarService => ({
     return id;
   },
 
+  // TODO: implement
   update: async (entity: CarEntity) => {
     return entity.id;
   },
+  // TODO: implement
   delete: async (id: string) => {
     return id;
   },
