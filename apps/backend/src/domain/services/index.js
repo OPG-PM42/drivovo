@@ -1,5 +1,5 @@
 import repositories from '../../repositories';
-import { createCarService } from './car';
+import createCarService from './car';
 import createAdminService from './admin';
 import createSessionService from './session';
 import createUserService from './user';
