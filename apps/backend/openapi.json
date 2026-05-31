@@ -1,176 +1,508 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Drivovo API",
-    "version": "1.0.0"
+    "title": "Drivovo Admin API",
+    "version": "1.0.0",
+    "description": "Admin-facing REST API for Drivovo. Authentication is cookie-based; clients must send `withCredentials: true`."
   },
+  "servers": [
+    { "url": "/", "description": "Same-origin (proxied via apps/admin/proxy.conf.json in dev)" }
+  ],
   "components": {
-    "securitySchemes": {},
-    "schemas": {}
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session"
+      }
+    },
+    "schemas": {
+      "Image": {
+        "type": "object",
+        "required": ["url", "width", "height"],
+        "properties": {
+          "url": { "type": "string" },
+          "alt": { "type": "string", "nullable": true },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" }
+        }
+      },
+      "Money": {
+        "type": "object",
+        "required": ["value", "currency"],
+        "properties": {
+          "value": { "type": "number" },
+          "currency": { "type": "string" }
+        }
+      },
+      "Option": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": { "type": "string" },
+          "price": { "$ref": "#/components/schemas/Money" },
+          "carId": { "type": "string", "format": "uuid" },
+          "countryId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Engine": {
+        "type": "object",
+        "required": ["type", "capacity", "fuel_consumption"],
+        "properties": {
+          "type": { "type": "string", "enum": ["petrol", "diesel", "electric", "hybrid", "other"] },
+          "capacity": { "type": "string" },
+          "fuel_consumption": { "type": "string" }
+        }
+      },
+      "Car": {
+        "type": "object",
+        "required": [
+          "id", "name", "brand", "description", "driveType", "type", "status",
+          "images", "engine", "interiorTrim", "acceleration", "power", "color", "url"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "brand": { "type": "string" },
+          "description": { "type": "string" },
+          "driveType": { "type": "string", "enum": ["FWD", "RWD", "AWD"] },
+          "type": {
+            "type": "string",
+            "enum": ["sedan", "hatchback", "suv", "mpv", "coupe", "convertible", "van", "pickup", "bus", "other"]
+          },
+          "status": { "type": "string", "enum": ["available", "order"] },
+          "images": { "type": "array", "items": { "$ref": "#/components/schemas/Image" } },
+          "engine": { "$ref": "#/components/schemas/Engine" },
+          "interiorTrim": { "type": "string" },
+          "acceleration": { "type": "string" },
+          "power": { "type": "string" },
+          "color": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      },
+      "CarCreate": {
+        "type": "object",
+        "required": ["name", "brand", "driveType", "type", "status", "engineType"],
+        "properties": {
+          "name": { "type": "string" },
+          "brand": { "type": "string" },
+          "description": { "type": "string" },
+          "driveType": { "type": "string", "enum": ["FWD", "RWD", "AWD"] },
+          "type": {
+            "type": "string",
+            "enum": ["sedan", "hatchback", "suv", "mpv", "coupe", "convertible", "van", "pickup", "bus", "other"]
+          },
+          "status": { "type": "string", "enum": ["available", "order"] },
+          "engineType": { "type": "string", "enum": ["petrol", "diesel", "electric", "hybrid", "other"] },
+          "engineCapacity": { "type": "string", "nullable": true },
+          "engineFuelCons": { "type": "string", "nullable": true },
+          "color": { "type": "string", "nullable": true },
+          "interiorTrim": { "type": "string", "nullable": true },
+          "power": { "type": "string", "nullable": true },
+          "acceleration": { "type": "string", "nullable": true },
+          "url": { "type": "string", "nullable": true },
+          "images": { "type": "array", "items": { "$ref": "#/components/schemas/Image" } }
+        }
+      },
+      "CarUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "brand": { "type": "string" },
+          "description": { "type": "string" },
+          "driveType": { "type": "string", "enum": ["FWD", "RWD", "AWD"] },
+          "type": {
+            "type": "string",
+            "enum": ["sedan", "hatchback", "suv", "mpv", "coupe", "convertible", "van", "pickup", "bus", "other"]
+          },
+          "status": { "type": "string", "enum": ["available", "order"] },
+          "engineType": { "type": "string", "enum": ["petrol", "diesel", "electric", "hybrid", "other"] },
+          "engineCapacity": { "type": "string", "nullable": true },
+          "engineFuelCons": { "type": "string", "nullable": true },
+          "color": { "type": "string", "nullable": true },
+          "interiorTrim": { "type": "string", "nullable": true },
+          "power": { "type": "string", "nullable": true },
+          "acceleration": { "type": "string", "nullable": true },
+          "url": { "type": "string", "nullable": true },
+          "images": { "type": "array", "items": { "$ref": "#/components/schemas/Image" } }
+        }
+      },
+      "CarListResult": {
+        "type": "object",
+        "required": ["items", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Car" } },
+          "total": { "type": "integer" }
+        }
+      },
+      "Tariff": {
+        "type": "object",
+        "required": ["id", "name", "type", "options"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["leasing", "subscription"] },
+          "options": { "type": "array", "items": { "$ref": "#/components/schemas/Option" } }
+        }
+      },
+      "TariffCreate": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["leasing", "subscription"] },
+          "options": { "type": "array", "items": { "$ref": "#/components/schemas/Option" } }
+        }
+      },
+      "TariffUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["leasing", "subscription"] },
+          "options": { "type": "array", "items": { "$ref": "#/components/schemas/Option" } }
+        }
+      },
+      "TariffListResult": {
+        "type": "object",
+        "required": ["items", "total"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Tariff" } },
+          "total": { "type": "integer" }
+        }
+      },
+      "AdminPublicView": {
+        "type": "object",
+        "description": "Admin profile shape that crosses the network boundary. Excludes passwordHash/passwordSalt by design — those must never leave the server.",
+        "required": ["id", "email", "name", "role", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "role": { "type": "string", "enum": ["admin", "manager"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SignInRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        }
+      },
+      "IdResponse": {
+        "type": "object",
+        "required": ["id"],
+        "properties": { "id": { "type": "string" } }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": { "success": { "type": "boolean" } }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["code", "error"],
+        "properties": {
+          "code": { "type": "string" },
+          "error": { "type": "string" }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": ["code", "error"],
+        "properties": {
+          "code": { "type": "string" },
+          "error": { "type": "string" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      },
+      "ValidationError": {
+        "description": "Validation error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+      }
+    },
+    "parameters": {
+      "limit": { "in": "query", "name": "limit", "required": false, "schema": { "type": "string" } },
+      "offset": { "in": "query", "name": "offset", "required": false, "schema": { "type": "string" } },
+      "sortOrder": { "in": "query", "name": "sortOrder", "required": false, "schema": { "type": "string", "enum": ["asc", "desc"] } },
+      "carsSortField": { "in": "query", "name": "sortField", "required": false, "schema": { "type": "string", "enum": ["name", "brand", "status"] } },
+      "tariffsSortField": { "in": "query", "name": "sortField", "required": false, "schema": { "type": "string", "enum": ["name", "type"] } },
+      "tariffsType": { "in": "query", "name": "type", "required": false, "schema": { "type": "string", "enum": ["leasing", "subscription"] } },
+      "pathId": { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+    }
   },
   "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "tags": ["meta"],
+        "summary": "Liveness probe",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
     "/cars": {
       "get": {
+        "operationId": "getCars",
+        "tags": ["cars"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/limit" },
+          { "$ref": "#/components/parameters/offset" },
+          { "$ref": "#/components/parameters/carsSortField" },
+          { "$ref": "#/components/parameters/sortOrder" }
+        ],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Paginated list of cars",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarListResult" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "post": {
+        "operationId": "createCar",
+        "tags": ["cars"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarCreate" } } }
+        },
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/IdResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
     },
     "/cars/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/pathId" }],
       "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "getCarById",
+        "tags": ["cars"],
+        "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Car",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Car" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "patch": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "updateCar",
+        "tags": ["cars"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarUpdate" } } }
+        },
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Updated",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "delete": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "deleteCar",
+        "tags": ["cars"],
+        "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/auth/sign-in": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/auth/sign-out": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/auth/me": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "Default Response"
-          }
+            "description": "Deleted",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
     },
     "/tariffs": {
       "get": {
+        "operationId": "getTariffs",
+        "tags": ["tariffs"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/limit" },
+          { "$ref": "#/components/parameters/offset" },
+          { "$ref": "#/components/parameters/tariffsSortField" },
+          { "$ref": "#/components/parameters/sortOrder" },
+          { "$ref": "#/components/parameters/tariffsType" }
+        ],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Paginated list of tariffs",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TariffListResult" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "post": {
+        "operationId": "createTariff",
+        "tags": ["tariffs"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TariffCreate" } } }
+        },
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/IdResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
     },
     "/tariffs/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/pathId" }],
       "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "getTariffById",
+        "tags": ["tariffs"],
+        "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Tariff",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tariff" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "patch": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "updateTariff",
+        "tags": ["tariffs"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TariffUpdate" } } }
+        },
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Updated",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       },
       "delete": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
+        "operationId": "deleteTariff",
+        "tags": ["tariffs"],
+        "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "Default Response"
-          }
+            "description": "Deleted",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/auth/sign-in": {
+      "post": {
+        "operationId": "signIn",
+        "tags": ["auth"],
+        "summary": "Sign in by email and password; sets session cookie on success.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignInRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Sign-in succeeded",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminPublicView" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/auth/sign-out": {
+      "post": {
+        "operationId": "signOut",
+        "tags": ["auth"],
+        "security": [{ "cookieAuth": [] }],
+        "summary": "Invalidate the current session and clear the cookie.",
+        "responses": {
+          "200": {
+            "description": "Sign-out succeeded",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getCurrentAdmin",
+        "tags": ["auth"],
+        "security": [{ "cookieAuth": [] }],
+        "summary": "Return the admin associated with the current session.",
+        "responses": {
+          "200": {
+            "description": "Current admin profile",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminPublicView" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
     }

@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AdminEntity } from '../../domain/admin';
-import { AuthRepository } from '../ports/auth.repository';
+import { AdminPublicView } from '../../domain/admin';
+import { AuthGateway } from '../ports/auth.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class SignInUseCase {
-  private readonly authRepo = inject(AuthRepository);
+  private readonly authGateway = inject(AuthGateway);
 
-  execute(email: string, password: string): Observable<AdminEntity> {
-    return this.authRepo.signIn(email, password);
+  execute(email: string, password: string): Observable<AdminPublicView> {
+    return this.authGateway.signIn(email, password);
   }
 }

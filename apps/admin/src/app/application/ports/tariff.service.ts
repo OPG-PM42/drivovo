@@ -12,7 +12,7 @@ export interface TariffListResult {
   total: number;
 }
 
-export abstract class TariffRepository {
+export abstract class TariffService {
   abstract getAll(params?: TariffListParams): Observable<TariffListResult>;
   abstract getById(id: string): Observable<TariffEntity>;
   abstract create(data: TariffCreate): Observable<TariffEntity>;

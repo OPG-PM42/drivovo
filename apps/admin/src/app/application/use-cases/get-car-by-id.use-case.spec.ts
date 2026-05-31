@@ -2,42 +2,42 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Injector } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { GetCarByIdUseCase } from './get-car-by-id.use-case';
-import { CarRepository } from '../ports/car.repository';
+import { CarService } from '../ports/car.service';
 import { NotFoundError } from '../../domain/errors';
 
 describe('GetCarByIdUseCase', () => {
   let useCase: GetCarByIdUseCase;
-  let repo: jest.Mocked<CarRepository>;
+  let svc: jest.Mocked<CarService>;
 
   beforeEach(() => {
-    const mock: jest.Mocked<CarRepository> = {
+    const mock: jest.Mocked<CarService> = {
       getAll: jest.fn(),
       getById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as jest.Mocked<CarRepository>;
+    } as jest.Mocked<CarService>;
 
     const injector = Injector.create({
       providers: [
         { provide: GetCarByIdUseCase, useClass: GetCarByIdUseCase },
-        { provide: CarRepository, useValue: mock },
+        { provide: CarService, useValue: mock },
       ],
     });
 
     useCase = injector.get(GetCarByIdUseCase);
-    repo = mock;
+    svc = mock;
   });
 
-  it('delegates to CarRepository.getById and returns the car', (done) => {
+  it('delegates to CarService.getById and returns the car', (done) => {
     const car = { id: '42', model: 'Tesla' } as any;
-    repo.getById.mockReturnValue(of(car));
+    svc.getById.mockReturnValue(of(car));
 
     useCase.execute('42').subscribe({
       next: (r) => {
         expect(r).toBe(car);
-        expect(repo.getById).toHaveBeenCalledWith('42');
-        expect(repo.getById).toHaveBeenCalledTimes(1);
+        expect(svc.getById).toHaveBeenCalledWith('42');
+        expect(svc.getById).toHaveBeenCalledTimes(1);
         (done as () => void)();
       },
     });
@@ -45,7 +45,7 @@ describe('GetCarByIdUseCase', () => {
 
   it('propagates NotFoundError when car does not exist', (done) => {
     const err = new NotFoundError('car', '42');
-    repo.getById.mockReturnValue(throwError(() => err));
+    svc.getById.mockReturnValue(throwError(() => err));
 
     useCase.execute('42').subscribe({
       error: (e) => {

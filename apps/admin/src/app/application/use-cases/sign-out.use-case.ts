@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AuthRepository } from '../ports/auth.repository';
+import { AuthGateway } from '../ports/auth.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class SignOutUseCase {
-  private readonly authRepo = inject(AuthRepository);
+  private readonly authGateway = inject(AuthGateway);
 
   execute(): Observable<void> {
-    return this.authRepo.signOut();
+    return this.authGateway.signOut();
   }
 }

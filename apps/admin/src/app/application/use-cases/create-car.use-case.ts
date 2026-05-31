@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CarEntity, CarCreate } from '../../domain/car';
-import { CarRepository } from '../ports/car.repository';
+import { CarService } from '../ports/car.service';
 
 @Injectable({ providedIn: 'root' })
 export class CreateCarUseCase {
-  private readonly carRepo = inject(CarRepository);
+  private readonly carService = inject(CarService);
 
   execute(data: CarCreate): Observable<CarEntity> {
-    return this.carRepo.create(data);
+    return this.carService.create(data);
   }
 }

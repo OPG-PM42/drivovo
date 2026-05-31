@@ -2,40 +2,40 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Injector } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { DeleteTariffUseCase } from './delete-tariff.use-case';
-import { TariffRepository } from '../ports/tariff.repository';
+import { TariffService } from '../ports/tariff.service';
 import { NotFoundError } from '../../domain/errors';
 
 describe('DeleteTariffUseCase', () => {
   let useCase: DeleteTariffUseCase;
-  let repo: jest.Mocked<TariffRepository>;
+  let svc: jest.Mocked<TariffService>;
 
   beforeEach(() => {
-    const mock: jest.Mocked<TariffRepository> = {
+    const mock: jest.Mocked<TariffService> = {
       getAll: jest.fn(),
       getById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as jest.Mocked<TariffRepository>;
+    } as jest.Mocked<TariffService>;
 
     const injector = Injector.create({
       providers: [
         { provide: DeleteTariffUseCase, useClass: DeleteTariffUseCase },
-        { provide: TariffRepository, useValue: mock },
+        { provide: TariffService, useValue: mock },
       ],
     });
 
     useCase = injector.get(DeleteTariffUseCase);
-    repo = mock;
+    svc = mock;
   });
 
-  it('delegates to TariffRepository.delete and completes', (done) => {
-    repo.delete.mockReturnValue(of(undefined));
+  it('delegates to TariffService.delete and completes', (done) => {
+    svc.delete.mockReturnValue(of(undefined));
 
     useCase.execute('7').subscribe({
       complete: () => {
-        expect(repo.delete).toHaveBeenCalledWith('7');
-        expect(repo.delete).toHaveBeenCalledTimes(1);
+        expect(svc.delete).toHaveBeenCalledWith('7');
+        expect(svc.delete).toHaveBeenCalledTimes(1);
         (done as () => void)();
       },
     });
@@ -43,7 +43,7 @@ describe('DeleteTariffUseCase', () => {
 
   it('propagates NotFoundError when tariff does not exist', (done) => {
     const err = new NotFoundError('tariff', '99');
-    repo.delete.mockReturnValue(throwError(() => err));
+    svc.delete.mockReturnValue(throwError(() => err));
 
     useCase.execute('99').subscribe({
       error: (caught) => {

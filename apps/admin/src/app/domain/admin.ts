@@ -1,6 +1,1 @@
-export interface AdminEntity {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-}
+export type { AdminPublicView, AdminRole } from '@drivovo/domain';

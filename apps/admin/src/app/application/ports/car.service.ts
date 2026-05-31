@@ -13,7 +13,7 @@ export interface CarListResult {
   total: number;
 }
 
-export abstract class CarRepository {
+export abstract class CarService {
   abstract getAll(params?: CarListParams): Observable<CarListResult>;
   abstract getById(id: string): Observable<CarEntity>;
   abstract create(data: CarCreate): Observable<CarEntity>;

@@ -20,7 +20,8 @@
     "migrate:down": "tsx apps/backend/scripts/migrate.ts down",
     "migrate:status": "tsx apps/backend/scripts/migrate.ts status",
     "migrate:create": "tsx apps/backend/scripts/migrate.ts create",
-    "seed:admin": "tsx apps/backend/scripts/seed-admin.ts"
+    "seed:admin": "tsx apps/backend/scripts/seed-admin.ts",
+    "codegen:admin-api": "openapi-generator-cli generate -g typescript-angular -i apps/backend/openapi.json -o apps/admin/src/app/infrastructure/api/generated --additional-properties=ngVersion=21.1,providedIn=none,useSingleRequestParameter=false,withInterfaces=true,fileNaming=kebab-case,modelPropertyNaming=camelCase"
   },
   "workspaces": [
     "libs/*"

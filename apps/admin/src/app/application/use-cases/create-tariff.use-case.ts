@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TariffEntity, TariffCreate } from '../../domain/tariff';
-import { TariffRepository } from '../ports/tariff.repository';
+import { TariffService } from '../ports/tariff.service';
 
 @Injectable({ providedIn: 'root' })
 export class CreateTariffUseCase {
-  private readonly tariffRepo = inject(TariffRepository);
+  private readonly tariffService = inject(TariffService);
 
   execute(data: TariffCreate): Observable<TariffEntity> {
-    return this.tariffRepo.create(data);
+    return this.tariffService.create(data);
   }
 }

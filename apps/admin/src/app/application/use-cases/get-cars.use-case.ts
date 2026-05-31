@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CarRepository, CarListParams, CarListResult } from '../ports/car.repository';
+import { CarService, CarListParams, CarListResult } from '../ports/car.service';
 
 @Injectable({ providedIn: 'root' })
 export class GetCarsUseCase {
-  private readonly carRepo = inject(CarRepository);
+  private readonly carService = inject(CarService);
 
   execute(params?: CarListParams): Observable<CarListResult> {
-    return this.carRepo.getAll(params);
+    return this.carService.getAll(params);
   }
 }

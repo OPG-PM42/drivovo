@@ -7,6 +7,11 @@ export default [
   ...nx.configs["flat/angular"],
   ...nx.configs["flat/angular-template"],
   {
+    // Generated OpenAPI client: skip all checks; it is hand-authored fallback
+    // mirroring the typescript-angular generator output.
+    ignores: ["apps/admin/src/app/infrastructure/api/generated/**"],
+  },
+  {
     plugins: { boundaries },
     settings: {
       "boundaries/elements": [
@@ -79,6 +84,28 @@ export default [
         {
           selector: "CallExpression[callee.property.name=/^(setAdmin|setLoading)$/]",
           message: "Do not call setAdmin or setLoading directly from presentation or use-case layer.",
+        },
+      ],
+    },
+  },
+  {
+    // Services in infrastructure/api/services may only import the generated barrel
+    // (index.ts), never api/* or model/* internal paths directly.
+    files: ["apps/admin/src/app/infrastructure/api/services/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "**/infrastructure/api/generated/api/*",
+                "**/infrastructure/api/generated/model/*",
+              ],
+              message:
+                "Import from the generated barrel (./generated) only — never from api/* or model/* internals.",
+            },
+          ],
         },
       ],
     },

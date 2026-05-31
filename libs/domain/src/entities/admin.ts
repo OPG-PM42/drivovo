@@ -23,3 +23,21 @@ export const adminSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
+
+export interface AdminPublicView {
+  id: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const adminPublicViewSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string().min(1),
+  role: z.enum(['admin', 'manager']),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});

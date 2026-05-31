@@ -2,50 +2,50 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Injector } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { GetTariffsUseCase } from './get-tariffs.use-case';
-import { TariffRepository, TariffListResult } from '../ports/tariff.repository';
+import { TariffService, TariffListResult } from '../ports/tariff.service';
 import { ApiError } from '../../domain/errors';
 
 describe('GetTariffsUseCase', () => {
   let useCase: GetTariffsUseCase;
-  let repo: jest.Mocked<TariffRepository>;
+  let svc: jest.Mocked<TariffService>;
 
   beforeEach(() => {
-    const mock: jest.Mocked<TariffRepository> = {
+    const mock: jest.Mocked<TariffService> = {
       getAll: jest.fn(),
       getById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as jest.Mocked<TariffRepository>;
+    } as jest.Mocked<TariffService>;
 
     const injector = Injector.create({
       providers: [
         { provide: GetTariffsUseCase, useClass: GetTariffsUseCase },
-        { provide: TariffRepository, useValue: mock },
+        { provide: TariffService, useValue: mock },
       ],
     });
 
     useCase = injector.get(GetTariffsUseCase);
-    repo = mock;
+    svc = mock;
   });
 
-  it('delegates to TariffRepository.getAll and returns result', (done) => {
+  it('delegates to TariffService.getAll and returns result', (done) => {
     const result: TariffListResult = { items: [], total: 0 };
-    repo.getAll.mockReturnValue(of(result));
+    svc.getAll.mockReturnValue(of(result));
 
     useCase.execute({ page: 1, limit: 10 }).subscribe({
       next: (value) => {
         expect(value).toBe(result);
-        expect(repo.getAll).toHaveBeenCalledWith({ page: 1, limit: 10 });
-        expect(repo.getAll).toHaveBeenCalledTimes(1);
+        expect(svc.getAll).toHaveBeenCalledWith({ page: 1, limit: 10 });
+        expect(svc.getAll).toHaveBeenCalledTimes(1);
         (done as () => void)();
       },
     });
   });
 
-  it('propagates ApiError from repository', (done) => {
+  it('propagates ApiError from service', (done) => {
     const err = new ApiError(500, 'Internal Server Error');
-    repo.getAll.mockReturnValue(throwError(() => err));
+    svc.getAll.mockReturnValue(throwError(() => err));
 
     useCase.execute().subscribe({
       error: (caught) => {

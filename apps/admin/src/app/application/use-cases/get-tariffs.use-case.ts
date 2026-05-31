@@ -1,12 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TariffRepository, TariffListParams, TariffListResult } from '../ports/tariff.repository';
+import {
+  TariffService,
+  TariffListParams,
+  TariffListResult,
+} from '../ports/tariff.service';
 
 @Injectable({ providedIn: 'root' })
 export class GetTariffsUseCase {
-  private readonly tariffRepo = inject(TariffRepository);
+  private readonly tariffService = inject(TariffService);
 
   execute(params?: TariffListParams): Observable<TariffListResult> {
-    return this.tariffRepo.getAll(params);
+    return this.tariffService.getAll(params);
   }
 }

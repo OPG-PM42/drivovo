@@ -1,6 +1,6 @@
 import { Injectable, inject, Signal } from '@angular/core';
 import { EMPTY, Observable, finalize, shareReplay, tap } from 'rxjs';
-import { AdminEntity } from '../../domain/admin';
+import { AdminPublicView } from '../../domain/admin';
 import { AuthStore } from './auth.store';
 import { SignInUseCase } from '../use-cases/sign-in.use-case';
 import { SignOutUseCase } from '../use-cases/sign-out.use-case';
@@ -29,13 +29,13 @@ export class AuthFacade {
   private readonly loadUC = inject(GetCurrentAdminUseCase);
 
   private isSigningOut = false;
-  private loadCurrent$?: Observable<AdminEntity>;
+  private loadCurrent$?: Observable<AdminPublicView>;
 
-  readonly admin: Signal<AdminEntity | null> = this.store.admin;
+  readonly admin: Signal<AdminPublicView | null> = this.store.admin;
   readonly isAuthenticated: Signal<boolean> = this.store.isAuthenticated;
   readonly loading: Signal<boolean> = this.store.loading;
 
-  signIn(email: string, password: string): Observable<AdminEntity> {
+  signIn(email: string, password: string): Observable<AdminPublicView> {
     return this.signInUC.execute(email, password).pipe(
       tap((admin) => this.store.setAdmin(admin)),
     );
@@ -57,7 +57,7 @@ export class AuthFacade {
     this.store.setAdmin(null);
   }
 
-  loadCurrent(): Observable<AdminEntity> {
+  loadCurrent(): Observable<AdminPublicView> {
     if (!this.loadCurrent$) {
       this.loadCurrent$ = this.loadUC.execute().pipe(
         tap((admin) => this.store.setAdmin(admin)),

@@ -11,12 +11,20 @@ import { tuiValidationErrorsProvider } from '@taiga-ui/core';
 import { appRoutes } from './app.routes';
 import { withCredentialsInterceptor, errorInterceptor } from './infrastructure/http';
 import { AdminErrorHandler } from './infrastructure/error-handler';
-import { CarRepository } from './application/ports/car.repository';
-import { TariffRepository } from './application/ports/tariff.repository';
-import { AuthRepository } from './application/ports/auth.repository';
-import { HttpCarRepository } from './infrastructure/api/ports-impl/http-car.repository';
-import { HttpTariffRepository } from './infrastructure/api/ports-impl/http-tariff.repository';
-import { HttpAuthRepository } from './infrastructure/api/ports-impl/http-auth.repository';
+import { environment } from '../environments/environment';
+import {
+  BASE_PATH,
+  Configuration,
+  AdminCarsService,
+  AdminTariffsService,
+  AdminAuthService,
+} from './infrastructure/api/generated';
+import { CarService } from './application/ports/car.service';
+import { TariffService } from './application/ports/tariff.service';
+import { AuthGateway } from './application/ports/auth.gateway';
+import { HttpCarService } from './infrastructure/api/services/http-car.service';
+import { HttpTariffService } from './infrastructure/api/services/http-tariff.service';
+import { HttpAuthGateway } from './infrastructure/api/services/http-auth.gateway';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,8 +44,17 @@ export const appConfig: ApplicationConfig = {
       max: ({ max }: { max: number }) => `Максимум ${max}`,
     }),
     { provide: ErrorHandler, useClass: AdminErrorHandler },
-    { provide: CarRepository, useClass: HttpCarRepository },
-    { provide: TariffRepository, useClass: HttpTariffRepository },
-    { provide: AuthRepository, useClass: HttpAuthRepository },
+    { provide: BASE_PATH, useValue: environment.apiBasePath },
+    {
+      provide: Configuration,
+      useFactory: () =>
+        new Configuration({ basePath: environment.apiBasePath, withCredentials: true }),
+    },
+    AdminCarsService,
+    AdminTariffsService,
+    AdminAuthService,
+    { provide: CarService, useClass: HttpCarService },
+    { provide: TariffService, useClass: HttpTariffService },
+    { provide: AuthGateway, useClass: HttpAuthGateway },
   ],
 };

@@ -2,45 +2,45 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Injector } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { SignOutUseCase } from './sign-out.use-case';
-import { AuthRepository } from '../ports/auth.repository';
+import { AuthGateway } from '../ports/auth.gateway';
 
 describe('SignOutUseCase', () => {
   let useCase: SignOutUseCase;
-  let repo: jest.Mocked<AuthRepository>;
+  let gateway: jest.Mocked<AuthGateway>;
 
   beforeEach(() => {
-    const mock: jest.Mocked<AuthRepository> = {
+    const mock: jest.Mocked<AuthGateway> = {
       signIn: jest.fn(),
       signOut: jest.fn(),
       getCurrentAdmin: jest.fn(),
-    } as jest.Mocked<AuthRepository>;
+    } as jest.Mocked<AuthGateway>;
 
     const injector = Injector.create({
       providers: [
         { provide: SignOutUseCase, useClass: SignOutUseCase },
-        { provide: AuthRepository, useValue: mock },
+        { provide: AuthGateway, useValue: mock },
       ],
     });
 
     useCase = injector.get(SignOutUseCase);
-    repo = mock;
+    gateway = mock;
   });
 
-  it('delegates to AuthRepository.signOut', (done) => {
-    repo.signOut.mockReturnValue(of(undefined));
+  it('delegates to AuthGateway.signOut', (done) => {
+    gateway.signOut.mockReturnValue(of(undefined));
 
     useCase.execute().subscribe({
       next: (result) => {
         expect(result).toBeUndefined();
-        expect(repo.signOut).toHaveBeenCalledTimes(1);
+        expect(gateway.signOut).toHaveBeenCalledTimes(1);
         (done as () => void)();
       },
     });
   });
 
-  it('propagates error from repository', (done) => {
+  it('propagates error from gateway', (done) => {
     const err = new Error('network');
-    repo.signOut.mockReturnValue(throwError(() => err));
+    gateway.signOut.mockReturnValue(throwError(() => err));
 
     useCase.execute().subscribe({
       error: (caught) => {

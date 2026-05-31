@@ -2,44 +2,44 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Injector } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { CreateTariffUseCase } from './create-tariff.use-case';
-import { TariffRepository } from '../ports/tariff.repository';
+import { TariffService } from '../ports/tariff.service';
 import { TariffEntity, TariffCreate } from '../../domain/tariff';
 import { ValidationError } from '../../domain/errors';
 
 describe('CreateTariffUseCase', () => {
   let useCase: CreateTariffUseCase;
-  let repo: jest.Mocked<TariffRepository>;
+  let svc: jest.Mocked<TariffService>;
 
   beforeEach(() => {
-    const mock: jest.Mocked<TariffRepository> = {
+    const mock: jest.Mocked<TariffService> = {
       getAll: jest.fn(),
       getById: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as jest.Mocked<TariffRepository>;
+    } as jest.Mocked<TariffService>;
 
     const injector = Injector.create({
       providers: [
         { provide: CreateTariffUseCase, useClass: CreateTariffUseCase },
-        { provide: TariffRepository, useValue: mock },
+        { provide: TariffService, useValue: mock },
       ],
     });
 
     useCase = injector.get(CreateTariffUseCase);
-    repo = mock;
+    svc = mock;
   });
 
-  it('delegates to TariffRepository.create and returns created entity', (done) => {
+  it('delegates to TariffService.create and returns created entity', (done) => {
     const payload = { name: 'Basic' } as TariffCreate;
     const created = { id: '1', name: 'Basic' } as TariffEntity;
-    repo.create.mockReturnValue(of(created));
+    svc.create.mockReturnValue(of(created));
 
     useCase.execute(payload).subscribe({
       next: (value) => {
         expect(value).toBe(created);
-        expect(repo.create).toHaveBeenCalledWith(payload);
-        expect(repo.create).toHaveBeenCalledTimes(1);
+        expect(svc.create).toHaveBeenCalledWith(payload);
+        expect(svc.create).toHaveBeenCalledTimes(1);
         (done as () => void)();
       },
     });
@@ -47,7 +47,7 @@ describe('CreateTariffUseCase', () => {
 
   it('propagates ValidationError on 422 response', (done) => {
     const err = new ValidationError('name is required', { field: 'name' });
-    repo.create.mockReturnValue(throwError(() => err));
+    svc.create.mockReturnValue(throwError(() => err));
 
     useCase.execute({ name: '' } as TariffCreate).subscribe({
       error: (caught) => {

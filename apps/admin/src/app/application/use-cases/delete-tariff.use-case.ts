@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TariffRepository } from '../ports/tariff.repository';
+import { TariffService } from '../ports/tariff.service';
 
 @Injectable({ providedIn: 'root' })
 export class DeleteTariffUseCase {
-  private readonly tariffRepo = inject(TariffRepository);
+  private readonly tariffService = inject(TariffService);
 
   execute(id: string): Observable<void> {
-    return this.tariffRepo.delete(id);
+    return this.tariffService.delete(id);
   }
 }

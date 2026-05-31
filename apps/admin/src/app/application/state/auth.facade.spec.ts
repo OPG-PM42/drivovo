@@ -6,7 +6,7 @@ import { AuthStore } from './auth.store';
 import { SignInUseCase } from '../use-cases/sign-in.use-case';
 import { SignOutUseCase } from '../use-cases/sign-out.use-case';
 import { GetCurrentAdminUseCase } from '../use-cases/get-current-admin.use-case';
-import { AdminEntity } from '../../domain/admin';
+import { AdminPublicView } from '../../domain/admin';
 
 describe('AuthFacade', () => {
   let facade: AuthFacade;
@@ -15,15 +15,15 @@ describe('AuthFacade', () => {
   let signOutUC: jest.Mocked<SignOutUseCase>;
   let loadUC: jest.Mocked<GetCurrentAdminUseCase>;
 
-  const admin: AdminEntity = { id: '1', email: 'a@b.c', name: 'A', role: 'admin' };
+  const admin: AdminPublicView = { id: '1', email: 'a@b.c', name: 'A', role: 'admin' };
 
   beforeEach(() => {
-    const adminSig = signal<AdminEntity | null>(null);
+    const adminSig = signal<AdminPublicView | null>(null);
     store = {
       admin: adminSig,
       isAuthenticated: signal(false),
       loading: signal(false),
-      setAdmin: jest.fn((a: AdminEntity | null) => adminSig.set(a)),
+      setAdmin: jest.fn((a: AdminPublicView | null) => adminSig.set(a)),
       setLoading: jest.fn(),
     } as unknown as jest.Mocked<AuthStore>;
 
@@ -84,7 +84,7 @@ describe('AuthFacade', () => {
   });
 
   it('loadCurrent dedupes parallel subscribers (use-case invoked once)', (done) => {
-    const subj = new Subject<AdminEntity>();
+    const subj = new Subject<AdminPublicView>();
     loadUC.execute.mockReturnValue(subj.asObservable());
     let received = 0;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -103,8 +103,8 @@ describe('AuthFacade', () => {
   });
 
   it('loadCurrent re-fetches after complete (manual reset works)', (done) => {
-    const first = new Subject<AdminEntity>();
-    const second = new Subject<AdminEntity>();
+    const first = new Subject<AdminPublicView>();
+    const second = new Subject<AdminPublicView>();
     loadUC.execute.mockReturnValueOnce(first.asObservable()).mockReturnValueOnce(second.asObservable());
 
     facade.loadCurrent().subscribe({
