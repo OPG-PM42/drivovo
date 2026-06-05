@@ -57,11 +57,7 @@ export default [
               message: "Use AuthFacade instead of auth.store directly.",
             },
             {
-              group: [
-                "**/application/use-cases/sign-in*",
-                "**/application/use-cases/sign-out*",
-                "**/application/use-cases/get-current-admin*",
-              ],
+              group: ["**/application/use-cases/auth.use-case*"],
               message: "Use AuthFacade for auth operations, not use-cases directly.",
             },
           ],

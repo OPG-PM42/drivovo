@@ -8,9 +8,7 @@ import { TuiForm } from '@taiga-ui/layout';
 import { carCreateSchema } from '@drivovo/domain';
 import { HasDirtyForm } from '../../guards/dirty-form.guard';
 import { ImageArrayEditorComponent, ImageFormControls } from '../../shared/forms/image-array-editor.component';
-import { GetCarByIdUseCase } from '../../../application/use-cases/get-car-by-id.use-case';
-import { CreateCarUseCase } from '../../../application/use-cases/create-car.use-case';
-import { UpdateCarUseCase } from '../../../application/use-cases/update-car.use-case';
+import { CarUseCase } from '../../../application/use-cases/car.use-case';
 
 @Component({
   selector: 'app-car-form-page',
@@ -34,9 +32,7 @@ export class CarFormPage implements OnInit, HasDirtyForm {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
-  private readonly getCarById = inject(GetCarByIdUseCase);
-  private readonly createCar = inject(CreateCarUseCase);
-  private readonly updateCar = inject(UpdateCarUseCase);
+  private readonly carUseCase = inject(CarUseCase);
 
   readonly driveTypes = ['FWD', 'RWD', 'AWD'];
   readonly carTypes = ['sedan', 'hatchback', 'suv', 'mpv', 'coupe', 'convertible', 'van', 'pickup', 'bus', 'other'];
@@ -81,7 +77,7 @@ export class CarFormPage implements OnInit, HasDirtyForm {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.loadingCar.set(true);
-      this.getCarById.execute(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.carUseCase.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (car) => {
           this.form.patchValue({
             name: car.name,
@@ -145,8 +141,8 @@ export class CarFormPage implements OnInit, HasDirtyForm {
     this.apiError.set('');
     const id = this.route.snapshot.params['id'];
     const op$ = id
-      ? this.updateCar.execute(id, parsed.data)
-      : this.createCar.execute(parsed.data);
+      ? this.carUseCase.update(id, parsed.data)
+      : this.carUseCase.create(parsed.data);
 
     op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {

@@ -2,9 +2,7 @@ import { Injectable, inject, Signal } from '@angular/core';
 import { EMPTY, Observable, finalize, shareReplay, tap } from 'rxjs';
 import { AdminPublicView } from '../../domain/admin';
 import { AuthStore } from './auth.store';
-import { SignInUseCase } from '../use-cases/sign-in.use-case';
-import { SignOutUseCase } from '../use-cases/sign-out.use-case';
-import { GetCurrentAdminUseCase } from '../use-cases/get-current-admin.use-case';
+import { AuthUseCase } from '../use-cases/auth.use-case';
 
 /**
  * Single entry-point for auth orchestration from presentation.
@@ -24,9 +22,7 @@ import { GetCurrentAdminUseCase } from '../use-cases/get-current-admin.use-case'
 @Injectable({ providedIn: 'root' })
 export class AuthFacade {
   private readonly store = inject(AuthStore);
-  private readonly signInUC = inject(SignInUseCase);
-  private readonly signOutUC = inject(SignOutUseCase);
-  private readonly loadUC = inject(GetCurrentAdminUseCase);
+  private readonly authUseCase = inject(AuthUseCase);
 
   private isSigningOut = false;
   private loadCurrent$?: Observable<AdminPublicView>;
@@ -36,7 +32,7 @@ export class AuthFacade {
   readonly loading: Signal<boolean> = this.store.loading;
 
   signIn(email: string, password: string): Observable<AdminPublicView> {
-    return this.signInUC.execute(email, password).pipe(
+    return this.authUseCase.signIn(email, password).pipe(
       tap((admin) => this.store.setAdmin(admin)),
     );
   }
@@ -44,7 +40,7 @@ export class AuthFacade {
   signOut(): Observable<void> {
     if (this.isSigningOut) return EMPTY;
     this.isSigningOut = true;
-    return this.signOutUC.execute().pipe(
+    return this.authUseCase.signOut().pipe(
       finalize(() => {
         this.store.setAdmin(null);
         this.isSigningOut = false;
@@ -59,7 +55,7 @@ export class AuthFacade {
 
   loadCurrent(): Observable<AdminPublicView> {
     if (!this.loadCurrent$) {
-      this.loadCurrent$ = this.loadUC.execute().pipe(
+      this.loadCurrent$ = this.authUseCase.getCurrentAdmin().pipe(
         tap((admin) => this.store.setAdmin(admin)),
         shareReplay({ bufferSize: 1, refCount: false }),
       );

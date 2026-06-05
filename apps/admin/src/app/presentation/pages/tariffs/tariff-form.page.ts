@@ -7,9 +7,7 @@ import { TuiSelect } from '@taiga-ui/kit';
 import { TuiForm } from '@taiga-ui/layout';
 import { tariffCreateSchema, TariffEntity } from '@drivovo/domain';
 import { HasDirtyForm } from '../../guards/dirty-form.guard';
-import { GetTariffByIdUseCase } from '../../../application/use-cases/get-tariff-by-id.use-case';
-import { CreateTariffUseCase } from '../../../application/use-cases/create-tariff.use-case';
-import { UpdateTariffUseCase } from '../../../application/use-cases/update-tariff.use-case';
+import { TariffUseCase } from '../../../application/use-cases/tariff.use-case';
 
 interface PriceFormControls {
   value:    FormControl<number | null>;
@@ -45,9 +43,7 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
-  private readonly getTariffById = inject(GetTariffByIdUseCase);
-  private readonly createTariff = inject(CreateTariffUseCase);
-  private readonly updateTariff = inject(UpdateTariffUseCase);
+  private readonly tariffUseCase = inject(TariffUseCase);
 
   readonly loadingTariff = signal(false);
   readonly saving = signal(false);
@@ -75,7 +71,7 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.loadingTariff.set(true);
-      this.getTariffById.execute(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.tariffUseCase.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (tariff) => {
           this.form.patchValue({ name: tariff.name, type: tariff.type });
           tariff.options.forEach((opt) => this.optionsArray.push(this.buildOptionGroup(opt)));
@@ -134,8 +130,8 @@ export class TariffFormPage implements OnInit, HasDirtyForm {
     this.apiError.set('');
     const id = this.route.snapshot.params['id'];
     const op$ = id
-      ? this.updateTariff.execute(id, parsed.data)
-      : this.createTariff.execute(parsed.data);
+      ? this.tariffUseCase.update(id, parsed.data)
+      : this.tariffUseCase.create(parsed.data);
 
     op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {

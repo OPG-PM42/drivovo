@@ -4,8 +4,7 @@ import { Router } from '@angular/router';
 import { TuiTable, TuiTablePagination, TuiTablePaginationEvent } from '@taiga-ui/addon-table';
 import { TuiButton, TuiLoader } from '@taiga-ui/core';
 import { CarEntity } from '../../../domain/car';
-import { GetCarsUseCase } from '../../../application/use-cases/get-cars.use-case';
-import { DeleteCarUseCase } from '../../../application/use-cases/delete-car.use-case';
+import { CarUseCase } from '../../../application/use-cases/car.use-case';
 import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 
 @Component({
@@ -23,8 +22,7 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 export class CarListPage implements OnInit {
   readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly getCars = inject(GetCarsUseCase);
-  private readonly deleteCar = inject(DeleteCarUseCase);
+  private readonly carUseCase = inject(CarUseCase);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly columns = ['name', 'brand', 'type', 'status', 'actions'];
@@ -41,7 +39,7 @@ export class CarListPage implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.getCars.execute({ page: this.pageIndex(), limit: this.pageSize() }).pipe(
+    this.carUseCase.getAll({ page: this.pageIndex(), limit: this.pageSize() }).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: ({ items, total }) => {
@@ -73,7 +71,7 @@ export class CarListPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteCar.execute(car.id).pipe(
+          this.carUseCase.delete(car.id).pipe(
             takeUntilDestroyed(this.destroyRef),
           ).subscribe(() => this.load());
         }

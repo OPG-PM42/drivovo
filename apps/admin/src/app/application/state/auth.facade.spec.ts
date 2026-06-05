@@ -3,19 +3,15 @@ import { Injector, signal } from '@angular/core';
 import { of, Subject } from 'rxjs';
 import { AuthFacade } from './auth.facade';
 import { AuthStore } from './auth.store';
-import { SignInUseCase } from '../use-cases/sign-in.use-case';
-import { SignOutUseCase } from '../use-cases/sign-out.use-case';
-import { GetCurrentAdminUseCase } from '../use-cases/get-current-admin.use-case';
+import { AuthUseCase } from '../use-cases/auth.use-case';
 import { AdminPublicView } from '../../domain/admin';
 
 describe('AuthFacade', () => {
   let facade: AuthFacade;
   let store: jest.Mocked<AuthStore>;
-  let signInUC: jest.Mocked<SignInUseCase>;
-  let signOutUC: jest.Mocked<SignOutUseCase>;
-  let loadUC: jest.Mocked<GetCurrentAdminUseCase>;
+  let authUseCase: jest.Mocked<AuthUseCase>;
 
-  const admin: AdminPublicView = { id: '1', email: 'a@b.c', name: 'A', role: 'admin' };
+  const admin: AdminPublicView = { id: '1', email: 'a@b.c', name: 'A', role: 'admin', createdAt: new Date(0), updatedAt: new Date(0) };
 
   beforeEach(() => {
     const adminSig = signal<AdminPublicView | null>(null);
@@ -27,16 +23,16 @@ describe('AuthFacade', () => {
       setLoading: jest.fn(),
     } as unknown as jest.Mocked<AuthStore>;
 
-    signInUC = { execute: jest.fn() } as unknown as jest.Mocked<SignInUseCase>;
-    signOutUC = { execute: jest.fn() } as unknown as jest.Mocked<SignOutUseCase>;
-    loadUC = { execute: jest.fn() } as unknown as jest.Mocked<GetCurrentAdminUseCase>;
+    authUseCase = {
+      signIn: jest.fn(),
+      signOut: jest.fn(),
+      getCurrentAdmin: jest.fn(),
+    } as unknown as jest.Mocked<AuthUseCase>;
 
     const injector = Injector.create({
       providers: [
         { provide: AuthStore, useValue: store },
-        { provide: SignInUseCase, useValue: signInUC },
-        { provide: SignOutUseCase, useValue: signOutUC },
-        { provide: GetCurrentAdminUseCase, useValue: loadUC },
+        { provide: AuthUseCase, useValue: authUseCase },
         { provide: AuthFacade, useClass: AuthFacade },
       ],
     });
@@ -44,11 +40,11 @@ describe('AuthFacade', () => {
   });
 
   it('signIn delegates and writes admin to store via tap', (done) => {
-    signInUC.execute.mockReturnValue(of(admin));
+    authUseCase.signIn.mockReturnValue(of(admin));
     facade.signIn('a@b.c', 'pwd').subscribe({
       next: (a) => {
         expect(a).toBe(admin);
-        expect(signInUC.execute).toHaveBeenCalledWith('a@b.c', 'pwd');
+        expect(authUseCase.signIn).toHaveBeenCalledWith('a@b.c', 'pwd');
         expect(store.setAdmin).toHaveBeenCalledWith(admin);
         (done as () => void)();
       },
@@ -57,14 +53,14 @@ describe('AuthFacade', () => {
 
   it('signOut is idempotent under parallel calls (use-case invoked once)', (done) => {
     const subj = new Subject<void>();
-    signOutUC.execute.mockReturnValue(subj.asObservable());
+    authUseCase.signOut.mockReturnValue(subj.asObservable());
     let completes = 0;
     const onComplete = () => {
       completes++;
       if (completes === 2) {
         // Use setTimeout(0) so finalize teardown has run before assertions
         setTimeout(() => {
-          expect(signOutUC.execute).toHaveBeenCalledTimes(1);
+          expect(authUseCase.signOut).toHaveBeenCalledTimes(1);
           expect(store.setAdmin).toHaveBeenCalledWith(null);
           expect(store.setAdmin).toHaveBeenCalledTimes(1);
           (done as () => void)();
@@ -85,7 +81,7 @@ describe('AuthFacade', () => {
 
   it('loadCurrent dedupes parallel subscribers (use-case invoked once)', (done) => {
     const subj = new Subject<AdminPublicView>();
-    loadUC.execute.mockReturnValue(subj.asObservable());
+    authUseCase.getCurrentAdmin.mockReturnValue(subj.asObservable());
     let received = 0;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const next = () => { if (++received === 2) finish(); };
@@ -96,7 +92,7 @@ describe('AuthFacade', () => {
     subj.next(admin); subj.complete();
 
     function finish() {
-      expect(loadUC.execute).toHaveBeenCalledTimes(1);
+      expect(authUseCase.getCurrentAdmin).toHaveBeenCalledTimes(1);
       expect(store.setAdmin).toHaveBeenCalledWith(admin);
       (done as () => void)();
     }
@@ -105,14 +101,14 @@ describe('AuthFacade', () => {
   it('loadCurrent re-fetches after complete (manual reset works)', (done) => {
     const first = new Subject<AdminPublicView>();
     const second = new Subject<AdminPublicView>();
-    loadUC.execute.mockReturnValueOnce(first.asObservable()).mockReturnValueOnce(second.asObservable());
+    authUseCase.getCurrentAdmin.mockReturnValueOnce(first.asObservable()).mockReturnValueOnce(second.asObservable());
 
     facade.loadCurrent().subscribe({
       complete: () => {
         // After complete, loadCurrent$ should be undefined again
         facade.loadCurrent().subscribe({
           complete: () => {
-            expect(loadUC.execute).toHaveBeenCalledTimes(2);
+            expect(authUseCase.getCurrentAdmin).toHaveBeenCalledTimes(2);
             (done as () => void)();
           },
         });

@@ -6,8 +6,7 @@ import { TuiTable, TuiTablePagination, TuiTablePaginationEvent } from '@taiga-ui
 import { TuiButton, TuiLoader, TuiTextfield } from '@taiga-ui/core';
 import { TuiSelect } from '@taiga-ui/kit';
 import { TariffEntity } from '../../../domain/tariff';
-import { GetTariffsUseCase } from '../../../application/use-cases/get-tariffs.use-case';
-import { DeleteTariffUseCase } from '../../../application/use-cases/delete-tariff.use-case';
+import { TariffUseCase } from '../../../application/use-cases/tariff.use-case';
 import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 
 @Component({
@@ -28,8 +27,7 @@ import { ConfirmDialogService } from '../../shared/ui/confirm-dialog.service';
 export class TariffListPage implements OnInit {
   readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly getTariffs = inject(GetTariffsUseCase);
-  private readonly deleteTariff = inject(DeleteTariffUseCase);
+  private readonly tariffUseCase = inject(TariffUseCase);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly columns = ['name', 'type', 'options', 'actions'];
@@ -54,7 +52,7 @@ export class TariffListPage implements OnInit {
       limit: this.pageSize(),
       ...(filter ? { type: filter as TariffEntity['type'] } : {}),
     };
-    this.getTariffs.execute(params).pipe(
+    this.tariffUseCase.getAll(params).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: ({ items, total }) => {
@@ -92,7 +90,7 @@ export class TariffListPage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.deleteTariff.execute(tariff.id).pipe(
+          this.tariffUseCase.delete(tariff.id).pipe(
             takeUntilDestroyed(this.destroyRef),
           ).subscribe(() => this.load());
         }
